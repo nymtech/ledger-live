@@ -1,5 +1,5 @@
-import { BigNumber } from "bignumber.js"
-import type { NymDelegationInfo, Transaction } from "./types"
+import { BigNumber } from "bignumber.js";
+import type { NymDelegationInfo, Transaction } from "./types";
 
 /**
  * Create an empty transaction
@@ -18,6 +18,6 @@ const createTransaction = (): Transaction => ({
   memo: null,
   sourceValidator: null,
   validators: [] as NymDelegationInfo[],
-})
+});
 
-export default createTransaction
+export default createTransaction;

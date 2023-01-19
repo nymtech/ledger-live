@@ -1,17 +1,17 @@
-import "../../__tests__/test-helpers/setup"
-import { testBridge } from "../../__tests__/test-helpers/bridge"
-import { BigNumber } from "bignumber.js"
+import "../../__tests__/test-helpers/setup";
+import { testBridge } from "../../__tests__/test-helpers/bridge";
+import { BigNumber } from "bignumber.js";
 import {
   InvalidAddress,
   InvalidAddressBecauseDestinationIsAlsoSource,
   NotEnoughBalance,
   AmountRequired,
-} from "@ledgerhq/errors"
-import { ClaimRewardsFeesWarning } from "../../errors"
-import invariant from "invariant"
-import type { NymAccount, Transaction } from "./types"
-import transactionTransformer from "./transaction"
-import { AccountRaw, CurrenciesData, DatasetTest } from "@ledgerhq/types-live"
+} from "@ledgerhq/errors";
+import { ClaimRewardsFeesWarning } from "../../errors";
+import invariant from "invariant";
+import type { NymAccount, Transaction } from "./types";
+import transactionTransformer from "./transaction";
+import { AccountRaw, CurrenciesData, DatasetTest } from "@ledgerhq/types-live";
 
 const nym: CurrenciesData<Transaction> = {
   FIXME_ignoreAccountFields: [
@@ -115,16 +115,16 @@ const nym: CurrenciesData<Transaction> = {
             mode: "send",
           }),
           expectedStatus: (account) => {
-            const { nymResources } = account as NymAccount
-            if (!nymResources) throw new Error("Should exist because it's nym")
+            const { nymResources } = account as NymAccount;
+            if (!nymResources) throw new Error("Should exist because it's nym");
             const totalSpent = account.balance.minus(
               nymResources.unbondingBalance.plus(nymResources.delegatedBalance)
-            )
+            );
             return {
               errors: {},
               warnings: {},
               totalSpent,
-            }
+            };
           },
         },
         {
@@ -143,17 +143,17 @@ const nym: CurrenciesData<Transaction> = {
             mode: "send",
           }),
           expectedStatus: (account, t) => {
-            const { nymResources } = account as NymAccount
-            if (!nymResources) throw new Error("Should exist because it's nym")
-            invariant(t.memo === "test", "Should have a memo")
+            const { nymResources } = account as NymAccount;
+            if (!nymResources) throw new Error("Should exist because it's nym");
+            invariant(t.memo === "test", "Should have a memo");
             const totalSpent = account.balance.minus(
               nymResources.unbondingBalance.plus(nymResources.delegatedBalance)
-            )
+            );
             return {
               errors: {},
               warnings: {},
               totalSpent,
-            }
+            };
           },
         },
         {
@@ -186,11 +186,11 @@ const nym: CurrenciesData<Transaction> = {
             mode: "redelegate",
           }),
           expectedStatus: (a, t) => {
-            invariant(t.memo === "Ledger Live", "Should have a memo")
+            invariant(t.memo === "Ledger Live", "Should have a memo");
             return {
               errors: {},
               warnings: {},
-            }
+            };
           },
         },
         {
@@ -248,11 +248,11 @@ const nym: CurrenciesData<Transaction> = {
             ],
           }),
           expectedStatus: (a, t) => {
-            invariant(t.memo === "Ledger Live", "Should have a memo")
+            invariant(t.memo === "Ledger Live", "Should have a memo");
             return {
               errors: {},
               warnings: {},
-            }
+            };
           },
         },
         {
@@ -287,11 +287,11 @@ const nym: CurrenciesData<Transaction> = {
             ],
           }),
           expectedStatus: (a, t) => {
-            invariant(t.memo === "Ledger Live", "Should have a memo")
+            invariant(t.memo === "Ledger Live", "Should have a memo");
             return {
               errors: { amount: new AmountRequired() },
               warnings: {},
-            }
+            };
           },
         },
         {
@@ -326,11 +326,11 @@ const nym: CurrenciesData<Transaction> = {
             mode: "claimReward",
           }),
           expectedStatus: (a, t) => {
-            invariant(t.memo === "Ledger Live", "Should have a memo")
+            invariant(t.memo === "Ledger Live", "Should have a memo");
             return {
               errors: {},
               warnings: {},
-            }
+            };
           },
         },
         {
@@ -385,11 +385,11 @@ const nym: CurrenciesData<Transaction> = {
             mode: "claimRewardCompound",
           }),
           expectedStatus: (a, t) => {
-            invariant(t.memo === "Ledger Live", "Should have a memo")
+            invariant(t.memo === "Ledger Live", "Should have a memo");
             return {
               errors: {},
               warnings: {},
-            }
+            };
           },
         },
         {
@@ -450,12 +450,12 @@ const nym: CurrenciesData<Transaction> = {
       } as AccountRaw,
     },
   ],
-}
+};
 const dataset: DatasetTest<Transaction> = {
   implementations: ["js"],
   currencies: {
     nym,
   },
-}
+};
 
-testBridge(dataset)
+testBridge(dataset);

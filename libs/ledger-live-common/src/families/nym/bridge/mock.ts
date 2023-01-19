@@ -1,36 +1,36 @@
-import { BigNumber } from "bignumber.js"
+import { BigNumber } from "bignumber.js";
 import {
   NotEnoughBalance,
   RecipientRequired,
   InvalidAddress,
   FeeTooHigh,
-} from "@ledgerhq/errors"
+} from "@ledgerhq/errors";
 import type {
   NymAccount,
   NymValidatorItem,
   StatusErrorMap,
   Transaction,
-} from "../types"
+} from "../types";
 import {
   scanAccounts,
   signOperation,
   broadcast,
   sync,
   isInvalidRecipient,
-} from "../../../bridge/mockHelpers"
-import { setNymPreloadData, asSafeNymPreloadData } from "../preloadedData"
-import { getMainAccount } from "../../../account"
-import mockPreloadedData from "../preloadedData.mock"
-import { makeAccountBridgeReceive } from "../../../bridge/mockHelpers"
+} from "../../../bridge/mockHelpers";
+import { setNymPreloadData, asSafeNymPreloadData } from "../preloadedData";
+import { getMainAccount } from "../../../account";
+import mockPreloadedData from "../preloadedData.mock";
+import { makeAccountBridgeReceive } from "../../../bridge/mockHelpers";
 import type {
   Account,
   AccountBridge,
   CurrencyBridge,
-} from "@ledgerhq/types-live"
-const receive = makeAccountBridgeReceive()
+} from "@ledgerhq/types-live";
+const receive = makeAccountBridgeReceive();
 
 const defaultGetFees = (a, t) =>
-  (t.fees || new BigNumber(0)).times(t.gas || new BigNumber(0))
+  (t.fees || new BigNumber(0)).times(t.gas || new BigNumber(0));
 
 const createTransaction = (): Transaction => ({
   family: "nym",
@@ -44,44 +44,46 @@ const createTransaction = (): Transaction => ({
   sourceValidator: null,
   networkInfo: null,
   useAllAmount: false,
-})
+});
 
-const updateTransaction = (t, patch) => ({ ...t, ...patch })
+const updateTransaction = (t, patch) => ({ ...t, ...patch });
 
 const estimateMaxSpendable = ({ account, parentAccount, transaction }) => {
-  const mainAccount = getMainAccount(account, parentAccount)
+  const mainAccount = getMainAccount(account, parentAccount);
   const estimatedFees = transaction
     ? defaultGetFees(mainAccount, transaction)
-    : new BigNumber(5000)
-  return Promise.resolve(BigNumber.max(0, account.balance.minus(estimatedFees)))
-}
+    : new BigNumber(5000);
+  return Promise.resolve(
+    BigNumber.max(0, account.balance.minus(estimatedFees))
+  );
+};
 
 const getTransactionStatus = (account: Account, t: Transaction) => {
-  const errors: StatusErrorMap = {}
-  const warnings: StatusErrorMap = {}
-  const useAllAmount = !!t.useAllAmount
-  const estimatedFees = defaultGetFees(account, t)
+  const errors: StatusErrorMap = {};
+  const warnings: StatusErrorMap = {};
+  const useAllAmount = !!t.useAllAmount;
+  const estimatedFees = defaultGetFees(account, t);
   const totalSpent = useAllAmount
     ? account.balance
-    : new BigNumber(t.amount).plus(estimatedFees)
+    : new BigNumber(t.amount).plus(estimatedFees);
   const amount = useAllAmount
     ? account.balance.minus(estimatedFees)
-    : new BigNumber(t.amount)
+    : new BigNumber(t.amount);
 
   if (amount.gt(0) && estimatedFees.times(10).gt(amount)) {
-    warnings.feeTooHigh = new FeeTooHigh()
+    warnings.feeTooHigh = new FeeTooHigh();
   }
 
   // Fill up transaction errors...
   if (totalSpent.gt(account.balance)) {
-    errors.amount = new NotEnoughBalance()
+    errors.amount = new NotEnoughBalance();
   }
 
   // Fill up recipient errors...
   if (!t.recipient) {
-    errors.recipient = new RecipientRequired("")
+    errors.recipient = new RecipientRequired("");
   } else if (isInvalidRecipient(t.recipient)) {
-    errors.recipient = new InvalidAddress("")
+    errors.recipient = new InvalidAddress("");
   }
 
   return Promise.resolve({
@@ -90,8 +92,8 @@ const getTransactionStatus = (account: Account, t: Transaction) => {
     estimatedFees,
     amount,
     totalSpent,
-  })
-}
+  });
+};
 
 const prepareTransaction = async (
   a: NymAccount,
@@ -106,11 +108,11 @@ const prepareTransaction = async (
         family: "nym",
         fees: new BigNumber(500),
       },
-    }
+    };
   }
 
-  return t
-}
+  return t;
+};
 
 const accountBridge: AccountBridge<Transaction> = {
   estimateMaxSpendable,
@@ -122,18 +124,18 @@ const accountBridge: AccountBridge<Transaction> = {
   receive,
   signOperation,
   broadcast,
-}
+};
 const currencyBridge: CurrencyBridge = {
   scanAccounts,
   preload: () => {
-    setNymPreloadData(mockPreloadedData)
-    return Promise.resolve(mockPreloadedData)
+    setNymPreloadData(mockPreloadedData);
+    return Promise.resolve(mockPreloadedData);
   },
   hydrate: (data: { validators?: NymValidatorItem[] }) => {
-    setNymPreloadData(asSafeNymPreloadData(data))
+    setNymPreloadData(asSafeNymPreloadData(data));
   },
-}
+};
 export default {
   currencyBridge,
   accountBridge,
-}
+};

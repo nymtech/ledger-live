@@ -1,9 +1,9 @@
-import invariant from "invariant"
-import { useEffect, useMemo, useState } from "react"
+import invariant from "invariant";
+import { useEffect, useMemo, useState } from "react";
 import {
   getCurrentNymPreloadData,
   getNymPreloadDataUpdates,
-} from "./preloadedData"
+} from "./preloadedData";
 import type {
   NymMappedDelegation,
   NymValidatorItem,
@@ -15,42 +15,42 @@ import type {
   NymExtraTxInfo,
   NymPreloadData,
   NymAccount,
-} from "./types"
+} from "./types";
 import {
   mapDelegations,
   mapDelegationInfo,
   searchFilter as defaultSearchFilter,
-} from "./logic"
-import { getAccountUnit } from "../../account"
-import useMemoOnce from "../../hooks/useMemoOnce"
-import { LEDGER_VALIDATOR_ADDRESS } from "./utils"
+} from "./logic";
+import { getAccountUnit } from "../../account";
+import useMemoOnce from "../../hooks/useMemoOnce";
+import { LEDGER_VALIDATOR_ADDRESS } from "./utils";
 
 // Add Nym-families imports below:
 import {
   getCurrentOsmosisPreloadData,
   getOsmosisPreloadDataUpdates,
-} from "../osmosis/preloadedData"
-import { LEDGER_OSMOSIS_VALIDATOR_ADDRESS } from "../osmosis/utils"
+} from "../osmosis/preloadedData";
+import { LEDGER_OSMOSIS_VALIDATOR_ADDRESS } from "../osmosis/utils";
 
 export function useNymFamilyPreloadData(currencyName: string): NymPreloadData {
-  let getCurrent
-  let getUpdates
+  let getCurrent;
+  let getUpdates;
 
   if (currencyName == "nym") {
-    getCurrent = getCurrentNymPreloadData
-    getUpdates = getNymPreloadDataUpdates
+    getCurrent = getCurrentNymPreloadData;
+    getUpdates = getNymPreloadDataUpdates;
   }
   if (currencyName == "osmosis") {
-    getCurrent = getCurrentOsmosisPreloadData
-    getUpdates = getOsmosisPreloadDataUpdates
+    getCurrent = getCurrentOsmosisPreloadData;
+    getUpdates = getOsmosisPreloadDataUpdates;
   }
 
-  const [state, setState] = useState(getCurrent)
+  const [state, setState] = useState(getCurrent);
   useEffect(() => {
-    const sub = getUpdates().subscribe(setState)
-    return () => sub.unsubscribe()
-  }, [getCurrent, getUpdates])
-  return state
+    const sub = getUpdates().subscribe(setState);
+    return () => sub.unsubscribe();
+  }, [getCurrent, getUpdates]);
+  return state;
 }
 
 // export function useNymPreloadData(): NymPreloadData {
@@ -66,22 +66,22 @@ export function useNymFamilyMappedDelegations(
   account: NymAccount,
   mode?: NymOperationMode
 ): NymMappedDelegation[] {
-  const currencyName = account.currency.name.toLowerCase()
-  const { validators } = useNymFamilyPreloadData(currencyName)
+  const currencyName = account.currency.name.toLowerCase();
+  const { validators } = useNymFamilyPreloadData(currencyName);
 
-  const delegations = account.nymResources?.delegations
-  invariant(delegations, "nym: delegations is required")
-  const unit = getAccountUnit(account)
+  const delegations = account.nymResources?.delegations;
+  invariant(delegations, "nym: delegations is required");
+  const unit = getAccountUnit(account);
   return useMemo(() => {
     const mappedDelegations = mapDelegations(
       delegations || [],
       validators,
       unit
-    )
+    );
     return mode === "claimReward"
       ? mappedDelegations.filter(({ pendingRewards }) => pendingRewards.gt(0))
-      : mappedDelegations
-  }, [delegations, validators, mode, unit])
+      : mappedDelegations;
+  }, [delegations, validators, mode, unit]);
 }
 
 export function useNymFamilyDelegationsQuerySelector(
@@ -89,29 +89,29 @@ export function useNymFamilyDelegationsQuerySelector(
   transaction: Transaction,
   delegationSearchFilter: NymSearchFilter = defaultSearchFilter
 ): {
-  query: string
-  setQuery: (query: string) => void
-  options: NymMappedDelegation[]
-  value: NymMappedDelegation | null | undefined
+  query: string;
+  setQuery: (query: string) => void;
+  options: NymMappedDelegation[];
+  value: NymMappedDelegation | null | undefined;
 } {
-  const [query, setQuery] = useState<string>("")
-  const delegations = useNymFamilyMappedDelegations(account, transaction.mode)
+  const [query, setQuery] = useState<string>("");
+  const delegations = useNymFamilyMappedDelegations(account, transaction.mode);
   const options = useMemo<NymMappedDelegation[]>(
     () => delegations.filter(delegationSearchFilter(query)),
     [query, delegations, delegationSearchFilter]
-  )
-  const selectedValidator = transaction.validators && transaction.validators[0]
+  );
+  const selectedValidator = transaction.validators && transaction.validators[0];
   const value = useMemo(() => {
     switch (transaction.mode) {
       case "redelegate":
         invariant(
           transaction.sourceValidator,
           "nym: sourceValidator is required"
-        )
+        );
         return options.find(
           ({ validatorAddress }) =>
             validatorAddress === transaction.sourceValidator
-        )
+        );
 
       default:
         return (
@@ -120,15 +120,15 @@ export function useNymFamilyDelegationsQuerySelector(
             ({ validatorAddress }) =>
               validatorAddress === selectedValidator.address
           )
-        )
+        );
     }
-  }, [delegations, selectedValidator, transaction, options])
+  }, [delegations, selectedValidator, transaction, options]);
   return {
     query,
     setQuery,
     options,
     value,
-  }
+  };
 }
 
 /** Hook to search and sort SR list according to initial votes and query */
@@ -140,7 +140,7 @@ export function useSortedValidators(
 ): NymMappedValidator[] {
   const initialVotes = useMemoOnce(() =>
     delegations.map(({ address }) => address)
-  )
+  );
   const mappedValidators = useMemo(
     () =>
       validators.map((validator, rank) => ({
@@ -148,7 +148,7 @@ export function useSortedValidators(
         validator,
       })),
     [validators]
-  )
+  );
   const sortedVotes = useMemo(
     () =>
       mappedValidators
@@ -162,15 +162,15 @@ export function useSortedValidators(
           )
         ),
     [mappedValidators, initialVotes]
-  )
+  );
   const sr = useMemo(
     () =>
       search
         ? mappedValidators.filter(validatorSearchFilter(search))
         : sortedVotes,
     [search, mappedValidators, sortedVotes, validatorSearchFilter]
-  )
-  return sr
+  );
+  return sr;
 }
 
 // Nothing using this function?
@@ -178,11 +178,11 @@ export function useMappedExtraOperationDetails({
   account,
   extra,
 }: {
-  account: NymAccount
-  extra: NymExtraTxInfo
+  account: NymAccount;
+  extra: NymExtraTxInfo;
 }): NymExtraTxInfo {
-  const { validators } = useNymFamilyPreloadData("nym")
-  const unit = getAccountUnit(account)
+  const { validators } = useNymFamilyPreloadData("nym");
+  const unit = getAccountUnit(account);
   return {
     validators: extra.validators
       ? mapDelegationInfo(extra.validators, validators, unit)
@@ -195,21 +195,21 @@ export function useMappedExtraOperationDetails({
       extra.autoClaimedRewards != null
         ? extra.autoClaimedRewards
         : "empty string",
-  }
+  };
 }
 
 export function useLedgerFirstShuffledValidatorsNymFamily(
   currencyName: string,
   searchInput?: string
 ): NymValidatorItem[] {
-  let data
-  let ledgerValidatorAddress
+  let data;
+  let ledgerValidatorAddress;
   if (currencyName == "osmosis") {
-    data = getCurrentOsmosisPreloadData()
-    ledgerValidatorAddress = LEDGER_OSMOSIS_VALIDATOR_ADDRESS
+    data = getCurrentOsmosisPreloadData();
+    ledgerValidatorAddress = LEDGER_OSMOSIS_VALIDATOR_ADDRESS;
   } else {
-    data = getCurrentNymPreloadData()
-    ledgerValidatorAddress = LEDGER_VALIDATOR_ADDRESS
+    data = getCurrentNymPreloadData();
+    ledgerValidatorAddress = LEDGER_VALIDATOR_ADDRESS;
   }
 
   return useMemo(() => {
@@ -217,8 +217,8 @@ export function useLedgerFirstShuffledValidatorsNymFamily(
       data?.validators ?? [],
       ledgerValidatorAddress,
       searchInput
-    )
-  }, [data, ledgerValidatorAddress, searchInput])
+    );
+  }, [data, ledgerValidatorAddress, searchInput]);
 }
 
 function reorderValidators(
@@ -233,21 +233,21 @@ function reorderValidators(
         ? validator.name.toLowerCase().includes(searchInput.toLowerCase())
         : true
     )
-    .sort((a, b) => b.votingPower - a.votingPower)
+    .sort((a, b) => b.votingPower - a.votingPower);
 
   // move Ledger validator to the first position
   const ledgerValidator = sortedValidators.find(
     (v) => v.validatorAddress === ledgerValidatorAddress
-  )
+  );
 
   if (ledgerValidator) {
     const sortedValidatorsLedgerFirst = sortedValidators.filter(
       (v) => v.validatorAddress !== ledgerValidatorAddress
-    )
-    sortedValidatorsLedgerFirst.unshift(ledgerValidator)
+    );
+    sortedValidatorsLedgerFirst.unshift(ledgerValidator);
 
-    return sortedValidatorsLedgerFirst
+    return sortedValidatorsLedgerFirst;
   }
 
-  return sortedValidators
+  return sortedValidators;
 }

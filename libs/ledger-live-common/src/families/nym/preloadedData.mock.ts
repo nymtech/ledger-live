@@ -1,5 +1,5 @@
-import type { NymPreloadData } from "./types"
-import { LEDGER_VALIDATOR_ADDRESS } from "./utils"
+import type { NymPreloadData } from "./types";
+import { LEDGER_VALIDATOR_ADDRESS } from "./utils";
 // Data manually fetched from the network between heights
 // 1685677 and 1685679
 const data: NymPreloadData = {
@@ -1014,5 +1014,5 @@ const data: NymPreloadData = {
       estimatedYearlyRewardsRate: 0,
     },
   ],
-}
-export default data
+};
+export default data;

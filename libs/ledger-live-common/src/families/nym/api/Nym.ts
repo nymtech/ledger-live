@@ -1,17 +1,17 @@
-import { getEnv } from "../../../env"
-import BigNumber from "bignumber.js"
-import network from "../../../network"
-import { patchOperationWithHash } from "../../../operation"
-import { CryptoCurrency } from "@ledgerhq/types-cryptoassets"
-import { Operation } from "@ledgerhq/types-live"
+import { getEnv } from "../../../env";
+import BigNumber from "bignumber.js";
+import network from "../../../network";
+import { patchOperationWithHash } from "../../../operation";
+import { CryptoCurrency } from "@ledgerhq/types-cryptoassets";
+import { Operation } from "@ledgerhq/types-live";
 
 const defaultEndpoint = getEnv(
   "API_NYM_BLOCKCHAIN_EXPLORER_API_ENDPOINT"
-).replace(/\/$/, "")
+).replace(/\/$/, "");
 
 export class NymAPI {
-  protected _defaultEndpoint: string = defaultEndpoint
-  protected _namespace = "nym"
+  protected _defaultEndpoint: string = defaultEndpoint;
+  protected _namespace = "nym";
 
   getAccountInfo = async (
     address: string,
@@ -36,7 +36,7 @@ export class NymAPI {
         this.getRedelegations(address),
         this.getUnbondings(address),
         this.getWithdrawAddress(address),
-      ])
+      ]);
 
       return {
         balances,
@@ -48,11 +48,11 @@ export class NymAPI {
         withdrawAddress,
         accountNumber,
         sequence,
-      }
+      };
     } catch (e: any) {
-      throw new Error(`"Error during nym synchronization: "${e.message}`)
+      throw new Error(`"Error during nym synchronization: "${e.message}`);
     }
-  }
+  };
 
   getAccount = async (
     address: string
@@ -61,47 +61,47 @@ export class NymAPI {
       address: address,
       accountNumber: 0,
       sequence: 0,
-    }
+    };
 
     try {
       const { data } = await network({
         method: "GET",
         url: `${this._defaultEndpoint}/nym/auth/v1beta1/accounts/${address}`,
-      })
+      });
 
       if (data.account.address) {
-        response.address = data.account.address
+        response.address = data.account.address;
       }
 
       if (data.account.account_number) {
-        response.accountNumber = parseInt(data.account.account_number)
+        response.accountNumber = parseInt(data.account.account_number);
       }
 
       if (data.account.sequence) {
-        response.sequence = parseInt(data.account.sequence)
+        response.sequence = parseInt(data.account.sequence);
       }
       // eslint-disable-next-line no-empty
     } catch (e) {}
-    return response
-  }
+    return response;
+  };
 
   getChainId = async (): Promise<string> => {
     const { data } = await network({
       method: "GET",
       url: `${this._defaultEndpoint}/node_info`,
-    })
+    });
 
-    return data.node_info.network
-  }
+    return data.node_info.network;
+  };
 
   getHeight = async (): Promise<number> => {
     const { data } = await network({
       method: "GET",
       url: `${this._defaultEndpoint}/nym/base/tendermint/v1beta1/blocks/latest`,
-    })
+    });
 
-    return data.block.header.height
-  }
+    return data.block.header.height;
+  };
 
   getAllBalances = async (
     address: string,
@@ -110,47 +110,47 @@ export class NymAPI {
     const { data } = await network({
       method: "GET",
       url: `${this._defaultEndpoint}/nym/bank/v1beta1/balances/${address}`,
-    })
+    });
 
-    let amount = new BigNumber(0)
+    let amount = new BigNumber(0);
 
     for (const elem of data.balances) {
       if (elem.denom === currency.units[1].code)
-        amount = amount.plus(elem.amount)
+        amount = amount.plus(elem.amount);
     }
 
-    return amount
-  }
+    return amount;
+  };
 
   getDelegations = async (
     address: string,
     currency: CryptoCurrency
   ): Promise<any> => {
-    const delegations: Array<any> = []
+    const delegations: Array<any> = [];
 
     const { data: data1 } = await network({
       method: "GET",
       url: `${this._defaultEndpoint}/nym/staking/v1beta1/delegations/${address}`,
-    })
+    });
 
     data1.delegation_responses = data1.delegation_responses.filter(
       (d) => d.balance.amount !== "0"
-    )
+    );
 
-    let status = "unbonded"
+    let status = "unbonded";
     const statusMap = {
       BOND_STATUS_UNBONDED: "unbonded",
       BOND_STATUS_UNBONDING: "unbonding",
       BOND_STATUS_BONDED: "bonded",
-    }
+    };
 
     for (const d of data1.delegation_responses) {
       const { data: data2 } = await network({
         method: "GET",
         url: `${this._defaultEndpoint}/nym/staking/v1beta1/validators/${d.delegation.validator_address}`,
-      })
+      });
 
-      status = statusMap[data2.validator.status] || "unbonded"
+      status = statusMap[data2.validator.status] || "unbonded";
 
       delegations.push({
         validatorAddress: d.delegation.validator_address,
@@ -160,13 +160,13 @@ export class NymAPI {
             : new BigNumber(0),
         pendingRewards: new BigNumber(0),
         status,
-      })
+      });
     }
 
     const { data: data3 } = await network({
       method: "GET",
       url: `${this._defaultEndpoint}/nym/distribution/v1beta1/delegators/${address}/rewards`,
-    })
+    });
 
     for (const r of data3.rewards) {
       for (const d of delegations) {
@@ -174,22 +174,22 @@ export class NymAPI {
           for (const reward of r.reward) {
             d.pendingRewards = d.pendingRewards.plus(
               new BigNumber(reward.amount).integerValue()
-            )
+            );
           }
         }
       }
     }
 
-    return delegations
-  }
+    return delegations;
+  };
 
   getRedelegations = async (address: string): Promise<any> => {
-    const redelegations: Array<any> = []
+    const redelegations: Array<any> = [];
 
     const { data } = await network({
       method: "GET",
       url: `${this._defaultEndpoint}/nym/staking/v1beta1/delegators/${address}/redelegations`,
-    })
+    });
 
     for (const r of data.redelegation_responses) {
       for (const entry of r.entries) {
@@ -198,20 +198,20 @@ export class NymAPI {
           validatorDstAddress: r.redelegation.validator_dst_address,
           amount: new BigNumber(entry.redelegation_entry.initial_balance),
           completionDate: new Date(entry.redelegation_entry.completion_time),
-        })
+        });
       }
     }
 
-    return redelegations
-  }
+    return redelegations;
+  };
 
   getUnbondings = async (address: string): Promise<any> => {
-    const unbondings: Array<any> = []
+    const unbondings: Array<any> = [];
 
     const { data } = await network({
       method: "GET",
       url: `${this._defaultEndpoint}/nym/staking/v1beta1/delegators/${address}/unbonding_delegations`,
-    })
+    });
 
     for (const u of data.unbonding_responses) {
       for (const entry of u.entries) {
@@ -219,55 +219,55 @@ export class NymAPI {
           validatorAddress: u.validator_address,
           amount: new BigNumber(entry.initial_balance),
           completionDate: new Date(entry.completion_time),
-        })
+        });
       }
     }
 
-    return unbondings
-  }
+    return unbondings;
+  };
 
   getWithdrawAddress = async (address: string): Promise<string> => {
     const { data } = await network({
       method: "GET",
       url: `${this._defaultEndpoint}/nym/distribution/v1beta1/delegators/${address}/withdraw_address`,
-    })
+    });
 
-    return data.withdraw_address
-  }
+    return data.withdraw_address;
+  };
 
   getTransactions = async (address: string): Promise<any> => {
     if (this._namespace === "osmosis") {
-      return []
+      return [];
     }
     const receive = await network({
       method: "GET",
       url:
         `${this._defaultEndpoint}/nym/tx/v1beta1/txs?events=` +
         encodeURI(`transfer.recipient='${address}'`),
-    })
+    });
 
     const send = await network({
       method: "GET",
       url:
         `${this._defaultEndpoint}/nym/tx/v1beta1/txs?events=` +
         encodeURI(`message.sender='${address}'`),
-    })
+    });
 
-    return [...receive.data.tx_responses, ...send.data.tx_responses]
-  }
+    return [...receive.data.tx_responses, ...send.data.tx_responses];
+  };
 
   isValidRecipent = async (address: string): Promise<boolean> => {
     try {
       await network({
         method: "GET",
         url: `${this._defaultEndpoint}/nym/bank/v1beta1/balances/${address}`,
-      })
+      });
 
-      return true
+      return true;
     } catch (e) {
-      return false
+      return false;
     }
-  }
+  };
 
   simulate = async (tx_bytes: Array<any>): Promise<BigNumber> => {
     try {
@@ -277,13 +277,13 @@ export class NymAPI {
         data: {
           tx_bytes: tx_bytes,
         },
-      })
+      });
 
-      return new BigNumber(data?.gas_info?.gas_used || 0)
+      return new BigNumber(data?.gas_info?.gas_used || 0);
     } catch (e) {
-      return new BigNumber(0)
+      return new BigNumber(0);
     }
-  }
+  };
 
   broadcast = async ({
     signedOperation: { operation, signature },
@@ -295,7 +295,7 @@ export class NymAPI {
         tx_bytes: Array.from(Uint8Array.from(Buffer.from(signature, "hex"))),
         mode: "BROADCAST_MODE_SYNC",
       },
-    })
+    });
 
     if (data.tx_response.code != 0) {
       // error codes: https://github.com/nym/nym-sdk/blob/master/types/errors/errors.go
@@ -305,11 +305,11 @@ export class NymAPI {
           ", message: '" +
           (data.tx_response.raw_log || "") +
           "')"
-      )
+      );
     }
 
-    return patchOperationWithHash(operation, data.tx_response.txhash)
-  }
+    return patchOperationWithHash(operation, data.tx_response.txhash);
+  };
 }
 
-export const defaultNymAPI = new NymAPI()
+export const defaultNymAPI = new NymAPI();

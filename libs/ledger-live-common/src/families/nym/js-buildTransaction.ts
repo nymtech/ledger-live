@@ -1,36 +1,36 @@
-import { NymAccount, Transaction } from "./types"
+import { NymAccount, Transaction } from "./types";
 import {
   makeAuthInfoBytes,
   Registry,
   TxBodyEncodeObject,
-} from "@cosmjs/proto-signing"
+} from "@cosmjs/proto-signing";
 import {
   MsgDelegate,
   MsgUndelegate,
   MsgBeginRedelegate,
-} from "cosmjs-types/nym/staking/v1beta1/tx"
-import { MsgWithdrawDelegatorReward } from "cosmjs-types/nym/distribution/v1beta1/tx"
-import { SignMode } from "cosmjs-types/nym/tx/signing/v1beta1/signing"
-import { TxRaw } from "cosmjs-types/nym/tx/v1beta1/tx"
-import { defaultNymAPI } from "./api/Nym"
-import BigNumber from "bignumber.js"
+} from "cosmjs-types/nym/staking/v1beta1/tx";
+import { MsgWithdrawDelegatorReward } from "cosmjs-types/nym/distribution/v1beta1/tx";
+import { SignMode } from "cosmjs-types/nym/tx/signing/v1beta1/signing";
+import { TxRaw } from "cosmjs-types/nym/tx/v1beta1/tx";
+import { defaultNymAPI } from "./api/Nym";
+import BigNumber from "bignumber.js";
 
 export const buildTransaction = async (
   account: NymAccount,
   transaction: Transaction
 ): Promise<any> => {
-  const msg: Array<{ typeUrl: string; value: any }> = []
+  const msg: Array<{ typeUrl: string; value: any }> = [];
 
   // Ledger Live is able to build transaction atomically,
   // Take care expected data are complete before push msg.
   // Otherwise, the transaction is silently returned intact.
 
-  let isComplete = true
+  let isComplete = true;
 
   switch (transaction.mode) {
     case "send":
       if (!transaction.recipient || transaction.amount.lte(0)) {
-        isComplete = false
+        isComplete = false;
       } else {
         msg.push({
           typeUrl: "/nym.bank.v1beta1.MsgSend",
@@ -44,20 +44,20 @@ export const buildTransaction = async (
               },
             ],
           },
-        })
+        });
       }
-      break
+      break;
 
     case "delegate":
       if (!transaction.validators || transaction.validators.length < 1) {
-        isComplete = false
+        isComplete = false;
       } else {
-        const validator = transaction.validators[0]
+        const validator = transaction.validators[0];
         if (!validator) {
-          isComplete = false
-          break
+          isComplete = false;
+          break;
         } else if (!validator.address || transaction.amount.lte(0)) {
-          isComplete = false
+          isComplete = false;
         }
 
         msg.push({
@@ -70,9 +70,9 @@ export const buildTransaction = async (
               amount: transaction.amount.toString(),
             },
           },
-        })
+        });
       }
-      break
+      break;
 
     case "undelegate":
       if (
@@ -81,7 +81,7 @@ export const buildTransaction = async (
         !transaction.validators[0].address ||
         transaction.validators[0].amount.lte(0)
       ) {
-        isComplete = false
+        isComplete = false;
       } else {
         msg.push({
           typeUrl: "/nym.staking.v1beta1.MsgUndelegate",
@@ -93,9 +93,9 @@ export const buildTransaction = async (
               amount: transaction.validators[0].amount.toString(),
             },
           },
-        })
+        });
       }
-      break
+      break;
 
     case "redelegate":
       if (
@@ -105,7 +105,7 @@ export const buildTransaction = async (
         !transaction.validators[0].address ||
         transaction.validators[0].amount.lte(0)
       ) {
-        isComplete = false
+        isComplete = false;
       } else {
         msg.push({
           typeUrl: "/nym.staking.v1beta1.MsgBeginRedelegate",
@@ -118,9 +118,9 @@ export const buildTransaction = async (
               amount: transaction.validators[0].amount.toString(),
             },
           },
-        })
+        });
       }
-      break
+      break;
 
     case "claimReward":
       if (
@@ -128,7 +128,7 @@ export const buildTransaction = async (
         transaction.validators.length < 1 ||
         !transaction.validators[0].address
       ) {
-        isComplete = false
+        isComplete = false;
       } else {
         msg.push({
           typeUrl: "/nym.distribution.v1beta1.MsgWithdrawDelegatorReward",
@@ -136,9 +136,9 @@ export const buildTransaction = async (
             delegatorAddress: account.freshAddress,
             validatorAddress: transaction.validators[0].address,
           },
-        })
+        });
       }
-      break
+      break;
 
     case "claimRewardCompound":
       if (
@@ -147,7 +147,7 @@ export const buildTransaction = async (
         !transaction.validators[0].address ||
         transaction.validators[0].amount.lte(0)
       ) {
-        isComplete = false
+        isComplete = false;
       } else {
         msg.push({
           typeUrl: "/nym.distribution.v1beta1.MsgWithdrawDelegatorReward",
@@ -155,7 +155,7 @@ export const buildTransaction = async (
             delegatorAddress: account.freshAddress,
             validatorAddress: transaction.validators[0].address,
           },
-        })
+        });
 
         msg.push({
           typeUrl: "/nym.staking.v1beta1.MsgDelegate",
@@ -167,17 +167,17 @@ export const buildTransaction = async (
               amount: transaction.validators[0].amount.toString(),
             },
           },
-        })
+        });
       }
-      break
+      break;
   }
 
   if (!isComplete) {
-    return []
+    return [];
   }
 
-  return msg
-}
+  return msg;
+};
 
 export const postBuildTransaction = async (
   account: NymAccount,
@@ -192,7 +192,7 @@ export const postBuildTransaction = async (
       messages: unsignedPayload,
       memo: transaction.memo || "",
     },
-  }
+  };
 
   // @ts-expect-error TODO: monorepo detected this error
   const registry = new Registry([
@@ -203,11 +203,11 @@ export const postBuildTransaction = async (
       "/nym.distribution.v1beta1.MsgWithdrawDelegatorReward",
       MsgWithdrawDelegatorReward,
     ],
-  ])
+  ]);
 
-  const { sequence } = await defaultNymAPI.getAccount(account.freshAddress)
+  const { sequence } = await defaultNymAPI.getAccount(account.freshAddress);
 
-  const txBodyBytes = registry.encode(txBodyFields)
+  const txBodyBytes = registry.encode(txBodyFields);
 
   const authInfoBytes = makeAuthInfoBytes(
     [{ pubkey, sequence }],
@@ -219,17 +219,17 @@ export const postBuildTransaction = async (
     ],
     transaction.gas?.toNumber() || new BigNumber(250000).toNumber(),
     SignMode.SIGN_MODE_LEGACY_AMINO_JSON
-  )
+  );
 
   const txRaw = TxRaw.fromPartial({
     bodyBytes: txBodyBytes,
     authInfoBytes,
     signatures: [signature],
-  })
+  });
 
-  const tx_bytes = Array.from(Uint8Array.from(TxRaw.encode(txRaw).finish()))
+  const tx_bytes = Array.from(Uint8Array.from(TxRaw.encode(txRaw).finish()));
 
-  return tx_bytes
-}
+  return tx_bytes;
+};
 
-export default buildTransaction
+export default buildTransaction;

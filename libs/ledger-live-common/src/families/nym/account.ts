@@ -1,23 +1,23 @@
-import invariant from "invariant"
-import { BigNumber } from "bignumber.js"
-import { getCurrentNymPreloadData } from "./preloadedData"
-import { getAccountUnit } from "../../account"
-import { formatCurrencyUnit } from "../../currencies"
+import invariant from "invariant";
+import { BigNumber } from "bignumber.js";
+import { getCurrentNymPreloadData } from "./preloadedData";
+import { getAccountUnit } from "../../account";
+import { formatCurrencyUnit } from "../../currencies";
 import {
   NymOperation,
   NymExtraTxInfo,
   NymPreloadData,
   NymAccount,
-} from "./types"
-import { mapDelegations, mapUnbondings, mapRedelegations } from "./logic"
-import { getCurrentOsmosisPreloadData } from "../osmosis/preloadedData"
-import type { Unit } from "@ledgerhq/types-cryptoassets"
+} from "./types";
+import { mapDelegations, mapUnbondings, mapRedelegations } from "./logic";
+import { getCurrentOsmosisPreloadData } from "../osmosis/preloadedData";
+import type { Unit } from "@ledgerhq/types-cryptoassets";
 
 function formatOperationSpecifics(
   op: NymOperation,
   unit: Unit | null | undefined
 ): string {
-  const { validators } = op.extra
+  const { validators } = op.extra;
   return (validators || [])
     .map(
       (v) =>
@@ -30,54 +30,54 @@ function formatOperationSpecifics(
             : v.amount
         }`
     )
-    .join("")
+    .join("");
 }
 
 function getCurrentNymFamilyPreloadData(currencyName: string): NymPreloadData {
   if (currencyName === "osmosis") {
-    return getCurrentOsmosisPreloadData()
+    return getCurrentOsmosisPreloadData();
   } else {
-    return getCurrentNymPreloadData()
+    return getCurrentNymPreloadData();
   }
 }
 
 export function formatAccountSpecifics(account: NymAccount): string {
-  const { nymResources } = account
-  invariant(nymResources, "nym account expected")
-  const currencyName = account.currency.name.toLowerCase()
-  const { validators } = getCurrentNymFamilyPreloadData(currencyName)
+  const { nymResources } = account;
+  invariant(nymResources, "nym account expected");
+  const currencyName = account.currency.name.toLowerCase();
+  const { validators } = getCurrentNymFamilyPreloadData(currencyName);
 
-  const unit = getAccountUnit(account)
+  const unit = getAccountUnit(account);
   const formatConfig = {
     disableRounding: true,
     alwaysShowSign: false,
     showCode: true,
-  }
-  let str = " "
+  };
+  let str = " ";
   str +=
     formatCurrencyUnit(unit, account.spendableBalance, formatConfig) +
-    " spendable. "
+    " spendable. ";
 
   if (nymResources?.delegatedBalance.gt(0)) {
     str +=
       formatCurrencyUnit(unit, nymResources.delegatedBalance, formatConfig) +
-      " delegated. "
+      " delegated. ";
   }
 
   if (nymResources?.unbondingBalance.gt(0)) {
     str +=
       formatCurrencyUnit(unit, nymResources.unbondingBalance, formatConfig) +
-      " unbonding. "
+      " unbonding. ";
   }
 
   const mappedDelegations = mapDelegations(
     nymResources?.delegations ?? [],
     validators,
     unit
-  )
+  );
 
   if (mappedDelegations.length) {
-    str += "\nDELEGATIONS\n"
+    str += "\nDELEGATIONS\n";
     str += mappedDelegations
       .map(
         (d) =>
@@ -94,17 +94,17 @@ export function formatAccountSpecifics(account: NymAccount): string {
               : ""
           }`
       )
-      .join("\n")
+      .join("\n");
   }
 
   const mappedUnbondings = mapUnbondings(
     nymResources?.unbondings ?? [],
     validators,
     unit
-  )
+  );
 
   if (mappedUnbondings.length) {
-    str += "\nUNDELEGATIONS\n"
+    str += "\nUNDELEGATIONS\n";
     str += mappedUnbondings
       .map(
         (d) =>
@@ -113,17 +113,17 @@ export function formatAccountSpecifics(account: NymAccount): string {
             disableRounding: true,
           })}`
       )
-      .join("\n")
+      .join("\n");
   }
 
   const mappedRedelegations = mapRedelegations(
     nymResources?.redelegations ?? [],
     validators,
     unit
-  )
+  );
 
   if (mappedRedelegations.length) {
-    str += "\nREDELEGATIONS\n"
+    str += "\nREDELEGATIONS\n";
     str += mappedRedelegations
       .map(
         (d) =>
@@ -134,16 +134,16 @@ export function formatAccountSpecifics(account: NymAccount): string {
             disableRounding: true,
           })}`
       )
-      .join("\n")
+      .join("\n");
   }
 
-  return str
+  return str;
 }
 
 export function fromOperationExtraRaw(
   extra: Record<string, any> | null | undefined
 ): NymExtraTxInfo | Record<string, any> | null | undefined {
-  let e = {}
+  let e = {};
   if (extra && extra.validators) {
     e = {
       ...extra,
@@ -151,14 +151,14 @@ export function fromOperationExtraRaw(
         ...o,
         amount: new BigNumber(o.amount),
       })),
-    }
+    };
   }
-  return e
+  return e;
 }
 export function toOperationExtraRaw(
   extra: Record<string, any> | null | undefined
 ): NymExtraTxInfo | Record<string, any> | null | undefined {
-  let e = {}
+  let e = {};
 
   if (extra && extra.validators) {
     e = {
@@ -167,13 +167,13 @@ export function toOperationExtraRaw(
         ...o,
         amount: o.amount.toString(),
       })),
-    }
+    };
   }
-  return e
+  return e;
 }
 export default {
   formatAccountSpecifics,
   formatOperationSpecifics,
   fromOperationExtraRaw,
   toOperationExtraRaw,
-}
+};

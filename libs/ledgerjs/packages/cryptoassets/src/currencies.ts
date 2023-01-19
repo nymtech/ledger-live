@@ -21,9 +21,9 @@
  * if bitcoin family, supportsSegwit defines if it supports segwit.
  */
 
-import type { CryptoCurrency, Unit } from "@ledgerhq/types-cryptoassets"
+import type { CryptoCurrency, Unit } from "@ledgerhq/types-cryptoassets";
 
-const makeTestnetUnit = (u) => ({ ...u, code: `𝚝${u.code}` })
+const makeTestnetUnit = (u) => ({ ...u, code: `𝚝${u.code}` });
 
 const bitcoinUnits: Unit[] = [
   {
@@ -46,7 +46,7 @@ const bitcoinUnits: Unit[] = [
     code: "sat",
     magnitude: 0,
   },
-]
+];
 
 const ethereumUnits = (name, code) => [
   {
@@ -74,7 +74,7 @@ const ethereumUnits = (name, code) => [
     code: "wei",
     magnitude: 0,
   },
-]
+];
 
 export const cryptocurrenciesById: Record<string, CryptoCurrency> = {
   near: {
@@ -3482,17 +3482,17 @@ export const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
-}
-const cryptocurrenciesByScheme: Record<string, CryptoCurrency> = {}
-const cryptocurrenciesByTicker: Record<string, CryptoCurrency> = {}
-const cryptocurrenciesArray: CryptoCurrency[] = []
-const prodCryptoArray: CryptoCurrency[] = []
-const cryptocurrenciesArrayWithoutTerminated: CryptoCurrency[] = []
-const prodCryptoArrayWithoutTerminated: CryptoCurrency[] = []
+};
+const cryptocurrenciesByScheme: Record<string, CryptoCurrency> = {};
+const cryptocurrenciesByTicker: Record<string, CryptoCurrency> = {};
+const cryptocurrenciesArray: CryptoCurrency[] = [];
+const prodCryptoArray: CryptoCurrency[] = [];
+const cryptocurrenciesArrayWithoutTerminated: CryptoCurrency[] = [];
+const prodCryptoArrayWithoutTerminated: CryptoCurrency[] = [];
 
 for (const id in cryptocurrenciesById) {
-  const definition = cryptocurrenciesById[id]
-  registerCryptoCurrency(id, definition)
+  const definition = cryptocurrenciesById[id];
+  registerCryptoCurrency(id, definition);
 }
 
 /**
@@ -3504,33 +3504,33 @@ export function registerCryptoCurrency(
   id: string,
   currency: CryptoCurrency
 ): void {
-  cryptocurrenciesById[currency.id] = currency
-  cryptocurrenciesByScheme[currency.scheme] = currency
+  cryptocurrenciesById[currency.id] = currency;
+  cryptocurrenciesByScheme[currency.scheme] = currency;
 
   if (!currency.isTestnetFor) {
-    const currencyAlreadySet = cryptocurrenciesByTicker[currency.ticker]
+    const currencyAlreadySet = cryptocurrenciesByTicker[currency.ticker];
     const curencyHasTickerinKeywords = Boolean(
       currency?.keywords?.includes(currency.ticker)
-    )
+    );
 
     if (
       !currencyAlreadySet ||
       // In case of duplicates, we prioritize currencies with the ticker as a keyword of the currency
       (currencyAlreadySet && curencyHasTickerinKeywords)
     ) {
-      cryptocurrenciesByTicker[currency.ticker] = currency
+      cryptocurrenciesByTicker[currency.ticker] = currency;
     }
-    prodCryptoArray.push(currency)
+    prodCryptoArray.push(currency);
 
     if (!currency.terminated) {
-      prodCryptoArrayWithoutTerminated.push(currency)
+      prodCryptoArrayWithoutTerminated.push(currency);
     }
   }
 
-  cryptocurrenciesArray.push(currency)
+  cryptocurrenciesArray.push(currency);
 
   if (!currency.terminated) {
-    cryptocurrenciesArrayWithoutTerminated.push(currency)
+    cryptocurrenciesArrayWithoutTerminated.push(currency);
   }
 }
 
@@ -3549,7 +3549,7 @@ export function listCryptoCurrencies(
       : prodCryptoArray
     : withDevCrypto
     ? cryptocurrenciesArrayWithoutTerminated
-    : prodCryptoArrayWithoutTerminated
+    : prodCryptoArrayWithoutTerminated;
 }
 
 /**
@@ -3559,7 +3559,7 @@ export function listCryptoCurrencies(
 export function findCryptoCurrency(
   f: (arg0: CryptoCurrency) => boolean
 ): CryptoCurrency | null | undefined {
-  return cryptocurrenciesArray.find(f)
+  return cryptocurrenciesArray.find(f);
 }
 
 /**
@@ -3569,7 +3569,7 @@ export function findCryptoCurrency(
 export function findCryptoCurrencyByScheme(
   scheme: string
 ): CryptoCurrency | null | undefined {
-  return cryptocurrenciesByScheme[scheme]
+  return cryptocurrenciesByScheme[scheme];
 }
 
 /**
@@ -3579,7 +3579,7 @@ export function findCryptoCurrencyByScheme(
 export function findCryptoCurrencyByTicker(
   ticker: string
 ): CryptoCurrency | null | undefined {
-  return cryptocurrenciesByTicker[ticker]
+  return cryptocurrenciesByTicker[ticker];
 }
 
 /**
@@ -3589,7 +3589,7 @@ export function findCryptoCurrencyByTicker(
 export function findCryptoCurrencyById(
   id: string
 ): CryptoCurrency | null | undefined {
-  return cryptocurrenciesById[id]
+  return cryptocurrenciesById[id];
 }
 
 const testsMap = {
@@ -3604,7 +3604,7 @@ const testsMap = {
   id: (s) => findCryptoCurrencyById(s.toLowerCase()),
   ticker: (s) => findCryptoCurrencyByTicker(s.toUpperCase()),
   manager: (s) => findCryptoCurrencyByManagerAppName(s),
-}
+};
 
 /**
  *
@@ -3614,24 +3614,24 @@ export const findCryptoCurrencyByKeyword = (
   keyword: string,
   tests = ["keywords", "name", "id", "ticker", "manager"]
 ): CryptoCurrency | null | undefined => {
-  const search = keyword.replace(/ /, "").toLowerCase()
+  const search = keyword.replace(/ /, "").toLowerCase();
 
   const conditions: Array<(string) => CryptoCurrency | null | undefined> =
-    tests.map((t) => testsMap[t])
+    tests.map((t) => testsMap[t]);
 
   for (const condition of conditions) {
-    const currency = condition(search)
+    const currency = condition(search);
 
     if (currency) {
-      return currency
+      return currency;
     }
   }
-}
+};
 
 export const findCryptoCurrencyByManagerAppName = (
   managerAppName: string
 ): CryptoCurrency | null | undefined => {
-  const search = managerAppName.replace(/ /, "").toLowerCase()
+  const search = managerAppName.replace(/ /, "").toLowerCase();
 
   return (
     findCryptoCurrency((c) => c.managerAppName === managerAppName) ||
@@ -3641,26 +3641,26 @@ export const findCryptoCurrencyByManagerAppName = (
           c.managerAppName.replace(/ /, "").toLowerCase() === search
       )
     )
-  )
-}
+  );
+};
 
 /**
  *
  * @param {*} id
  */
 export const hasCryptoCurrencyId = (id: string): boolean =>
-  id in cryptocurrenciesById
+  id in cryptocurrenciesById;
 
 /**
  *
  * @param {*} id
  */
 export function getCryptoCurrencyById(id: string): CryptoCurrency {
-  const currency = findCryptoCurrencyById(id)
+  const currency = findCryptoCurrencyById(id);
 
   if (!currency) {
-    throw new Error(`currency with id "${id}" not found`)
+    throw new Error(`currency with id "${id}" not found`);
   }
 
-  return currency
+  return currency;
 }

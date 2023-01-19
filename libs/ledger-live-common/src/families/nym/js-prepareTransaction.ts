@@ -1,30 +1,30 @@
-import { NymAccount, Transaction } from "./types"
-import BigNumber from "bignumber.js"
-import { defaultNymAPI } from "./api/Nym"
-import { getEnv } from "../../env"
-import { buildTransaction, postBuildTransaction } from "./js-buildTransaction"
-import { getMaxEstimatedBalance } from "./logic"
-import { CacheRes, makeLRUCache } from "../../cache"
-import type { Account } from "@ledgerhq/types-live"
+import { NymAccount, Transaction } from "./types";
+import BigNumber from "bignumber.js";
+import { defaultNymAPI } from "./api/Nym";
+import { getEnv } from "../../env";
+import { buildTransaction, postBuildTransaction } from "./js-buildTransaction";
+import { getMaxEstimatedBalance } from "./logic";
+import { CacheRes, makeLRUCache } from "../../cache";
+import type { Account } from "@ledgerhq/types-live";
 
 export const calculateFees: CacheRes<
   Array<{
-    account: Account
-    transaction: Transaction
+    account: Account;
+    transaction: Transaction;
   }>,
   {
-    estimatedFees: BigNumber
-    estimatedGas: BigNumber
+    estimatedFees: BigNumber;
+    estimatedGas: BigNumber;
   }
 > = makeLRUCache(
   async ({
     account,
     transaction,
   }): Promise<{
-    estimatedFees: BigNumber
-    estimatedGas: BigNumber
+    estimatedFees: BigNumber;
+    estimatedGas: BigNumber;
   }> => {
-    return await getEstimatedFees(account as NymAccount, transaction)
+    return await getEstimatedFees(account as NymAccount, transaction);
   },
   ({ account, transaction }) =>
     `${account.id}_${account.currency.id}_${transaction.amount.toString()}_${
@@ -36,16 +36,16 @@ export const calculateFees: CacheRes<
     }_${transaction.memo ? transaction.memo.toString() : ""}_${
       transaction.sourceValidator ? transaction.sourceValidator : ""
     }`
-)
+);
 
 const getEstimatedFees = async (
   account: NymAccount,
   transaction: Transaction
 ): Promise<any> => {
-  let gasQty = new BigNumber(250000)
-  const gasPrice = new BigNumber(getEnv("NYM_GAS_PRICE"))
+  let gasQty = new BigNumber(250000);
+  const gasPrice = new BigNumber(getEnv("NYM_GAS_PRICE"));
 
-  const unsignedPayload = await buildTransaction(account, transaction)
+  const unsignedPayload = await buildTransaction(account, transaction);
 
   // be sure payload is complete
   if (unsignedPayload) {
@@ -55,7 +55,7 @@ const getEstimatedFees = async (
         ...new Uint8Array([10, 33]),
         ...new Uint8Array(Buffer.from(account.seedIdentifier, "hex")),
       ]),
-    }
+    };
 
     const tx_bytes = await postBuildTransaction(
       account,
@@ -63,9 +63,9 @@ const getEstimatedFees = async (
       pubkey,
       unsignedPayload,
       new Uint8Array(Buffer.from(account.seedIdentifier, "hex"))
-    )
+    );
 
-    const gasUsed = await defaultNymAPI.simulate(tx_bytes)
+    const gasUsed = await defaultNymAPI.simulate(tx_bytes);
 
     if (gasUsed.gt(0)) {
       gasQty = gasUsed
@@ -75,26 +75,26 @@ const getEstimatedFees = async (
         // Use coeff 2 as trick..
         // .multipliedBy(new BigNumber(getEnv("NYM_GAS_AMPLIFIER")))
         .multipliedBy(new BigNumber(getEnv("NYM_GAS_AMPLIFIER") * 2))
-        .integerValue()
+        .integerValue();
     }
   }
 
-  const estimatedGas = gasQty
+  const estimatedGas = gasQty;
 
-  const estimatedFees = gasPrice.multipliedBy(gasQty).integerValue()
+  const estimatedFees = gasPrice.multipliedBy(gasQty).integerValue();
 
-  return { estimatedFees, estimatedGas }
-}
+  return { estimatedFees, estimatedGas };
+};
 
 export const prepareTransaction = async (
   account: Account,
   transaction: Transaction
 ): Promise<Transaction> => {
-  let memo = transaction.memo
-  let amount = transaction.amount
+  let memo = transaction.memo;
+  let amount = transaction.amount;
 
   if (transaction.mode !== "send" && !transaction.memo) {
-    memo = "Ledger Live"
+    memo = "Ledger Live";
   }
 
   const { estimatedFees, estimatedGas } = await calculateFees({
@@ -106,10 +106,10 @@ export const prepareTransaction = async (
         : amount,
       memo,
     },
-  })
+  });
 
   if (transaction.useAllAmount) {
-    amount = getMaxEstimatedBalance(account as NymAccount, estimatedFees)
+    amount = getMaxEstimatedBalance(account as NymAccount, estimatedFees);
   }
 
   if (
@@ -124,10 +124,10 @@ export const prepareTransaction = async (
       fees: estimatedFees,
       gas: estimatedGas,
       amount,
-    }
+    };
   }
 
-  return transaction
-}
+  return transaction;
+};
 
-export default prepareTransaction
+export default prepareTransaction;

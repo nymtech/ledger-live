@@ -1,16 +1,16 @@
-import Prando from "prando"
-import { BigNumber } from "bignumber.js"
-import type { Account, Operation, OperationType } from "@ledgerhq/types-live"
+import Prando from "prando";
+import { BigNumber } from "bignumber.js";
+import type { Account, Operation, OperationType } from "@ledgerhq/types-live";
 import type {
   NymResources,
   NymDelegation,
   NymUnbonding,
   NymRedelegation,
   NymAccount,
-} from "./types"
-import preloadedData from "./preloadedData.mock"
-import { genHex, genAddress } from "../../mock/helpers"
-const { validators } = preloadedData
+} from "./types";
+import preloadedData from "./preloadedData.mock";
+import { genHex, genAddress } from "../../mock/helpers";
+const { validators } = preloadedData;
 
 function setNymResources(
   account: NymAccount,
@@ -36,17 +36,17 @@ function setNymResources(
     withdrawAddress: account.id,
     unbondings: unbondings ?? account.nymResources?.unbondings ?? [],
     redelegations: redelegations ?? account.nymResources?.redelegations ?? [],
-  }
-  return account
+  };
+  return account;
 }
 
 function setOperationFeeValue(
   operation: Operation,
   base: BigNumber
 ): Operation {
-  operation.fee = new BigNumber(Math.round(base.toNumber() * 0.001))
-  operation.value = operation.fee
-  return operation
+  operation.fee = new BigNumber(Math.round(base.toNumber() * 0.001));
+  operation.value = operation.fee;
+  return operation;
 }
 
 function genBaseOperation(
@@ -55,14 +55,14 @@ function genBaseOperation(
   type: OperationType,
   index: number
 ): Operation {
-  const { operations: ops } = account
-  const address = genAddress(account.currency, rng)
-  const lastOp = ops[index]
+  const { operations: ops } = account;
+  const address = genAddress(account.currency, rng);
+  const lastOp = ops[index];
   const date = new Date(
     (lastOp ? lastOp.date.valueOf() : Date.now()) -
       rng.nextInt(0, 100000000 * rng.next() * rng.next())
-  )
-  const hash = genHex(64, rng)
+  );
+  const hash = genHex(64, rng);
 
   /** generate given operation */
   return {
@@ -79,7 +79,7 @@ function genBaseOperation(
     accountId: account.id,
     date,
     extra: {},
-  }
+  };
 }
 
 /**
@@ -89,7 +89,7 @@ function genBaseOperation(
  * @param {Prando} rng
  */
 function addDelegationOperation(account: NymAccount, rng: Prando): Account {
-  const { spendableBalance } = account
+  const { spendableBalance } = account;
   const nymResources: NymResources = account.nymResources
     ? account.nymResources
     : {
@@ -100,14 +100,14 @@ function addDelegationOperation(account: NymAccount, rng: Prando): Account {
         withdrawAddress: "",
         unbondings: [],
         redelegations: [],
-      }
-  if (spendableBalance.isZero()) return account
+      };
+  if (spendableBalance.isZero()) return account;
 
   /** select position on the operation stack where we will insert the new delegation */
-  const opIndex = rng.next(0, 10)
-  const delegationOp = genBaseOperation(account, rng, "DELEGATE", opIndex)
-  const feeOp = genBaseOperation(account, rng, "FEES", opIndex)
-  const value = spendableBalance.plus(nymResources.delegatedBalance)
+  const opIndex = rng.next(0, 10);
+  const delegationOp = genBaseOperation(account, rng, "DELEGATE", opIndex);
+  const feeOp = genBaseOperation(account, rng, "FEES", opIndex);
+  const value = spendableBalance.plus(nymResources.delegatedBalance);
 
   /** select between 3 to 5 validators and split the amount evenly */
   const delegatedValidators = Array.from({
@@ -125,10 +125,10 @@ function addDelegationOperation(account: NymAccount, rng: Prando): Account {
       amount: new BigNumber(
         Math.round(value.toNumber() * rng.next(0.1, 1 / arr.length))
       ),
-    }))
+    }));
   delegationOp.extra = {
     validators: delegatedValidators,
-  }
+  };
 
   /** format delegations and randomize rewards and status */
   const delegations: NymDelegation[] = delegatedValidators.map(
@@ -140,24 +140,24 @@ function addDelegationOperation(account: NymAccount, rng: Prando): Account {
         : new BigNumber(0),
       status: rng.next() > 0.33 ? "bonded" : "unbonded",
     })
-  )
-  setNymResources(account, delegations, undefined, undefined, undefined)
+  );
+  setNymResources(account, delegations, undefined, undefined, undefined);
   setOperationFeeValue(
     delegationOp,
     account.nymResources
       ? account.nymResources.delegatedBalance
       : new BigNumber(0)
-  )
+  );
   setOperationFeeValue(
     feeOp,
     account.nymResources
       ? account.nymResources.delegatedBalance
       : new BigNumber(0)
-  )
-  postSyncAccount(account)
-  account.operations.splice(opIndex, 0, delegationOp, feeOp)
-  account.operationsCount += 2
-  return account
+  );
+  postSyncAccount(account);
+  account.operations.splice(opIndex, 0, delegationOp, feeOp);
+  account.operationsCount += 2;
+  return account;
 }
 
 /**
@@ -177,24 +177,24 @@ function addRedelegationOperation(account: NymAccount, rng: Prando): Account {
         withdrawAddress: "",
         unbondings: [],
         redelegations: [],
-      }
-  if (!nymResources.delegations.length) return account
+      };
+  if (!nymResources.delegations.length) return account;
 
   /** select position on the operation stack where we will insert the new delegation */
-  const opIndex = rng.next(0, 10)
-  const redelegationOp = genBaseOperation(account, rng, "REDELEGATE", opIndex)
-  const fromDelegation = rng.nextArrayItem(nymResources.delegations)
+  const opIndex = rng.next(0, 10);
+  const redelegationOp = genBaseOperation(account, rng, "REDELEGATE", opIndex);
+  const fromDelegation = rng.nextArrayItem(nymResources.delegations);
   const amount = new BigNumber(
     Math.round(fromDelegation.amount.toNumber() * rng.next(0.1, 1))
-  )
-  const toDelegation = rng.nextArrayItem(validators)
+  );
+  const toDelegation = rng.nextArrayItem(validators);
   redelegationOp.extra = {
     validator: {
       address: toDelegation.validatorAddress,
       amount,
     },
     sourceValidator: fromDelegation.validatorAddress,
-  }
+  };
   const delegations = nymResources.delegations
     .filter(
       ({ validatorAddress }) =>
@@ -209,7 +209,7 @@ function addRedelegationOperation(account: NymAccount, rng: Prando): Account {
           : new BigNumber(0),
         status: rng.next() > 0.33 ? "bonded" : "unbonded",
       },
-    ])
+    ]);
   setNymResources(account, delegations, undefined, undefined, [
     {
       validatorSrcAddress: fromDelegation.validatorAddress,
@@ -217,11 +217,11 @@ function addRedelegationOperation(account: NymAccount, rng: Prando): Account {
       amount,
       completionDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
     },
-  ])
-  setOperationFeeValue(redelegationOp, amount)
-  account.operations.splice(opIndex, 0, redelegationOp)
-  account.operationsCount++
-  return account
+  ]);
+  setOperationFeeValue(redelegationOp, amount);
+  account.operations.splice(opIndex, 0, redelegationOp);
+  account.operationsCount++;
+  return account;
 }
 
 /**
@@ -241,35 +241,35 @@ function addClaimRewardsOperation(account: NymAccount, rng: Prando): Account {
         withdrawAddress: "",
         unbondings: [],
         redelegations: [],
-      }
-  if (!nymResources.delegations.length) return account
+      };
+  if (!nymResources.delegations.length) return account;
 
   /** select position on the operation stack where we will insert the new claim rewards */
-  const opIndex = rng.next(0, 10)
-  const claimRewardOp = genBaseOperation(account, rng, "REWARD", opIndex)
-  const fromDelegation = rng.nextArrayItem(nymResources.delegations)
+  const opIndex = rng.next(0, 10);
+  const claimRewardOp = genBaseOperation(account, rng, "REWARD", opIndex);
+  const fromDelegation = rng.nextArrayItem(nymResources.delegations);
   const amount = fromDelegation.pendingRewards.gt(0)
     ? fromDelegation.pendingRewards
-    : new BigNumber(Math.round(fromDelegation.amount.toNumber() * 0.01))
+    : new BigNumber(Math.round(fromDelegation.amount.toNumber() * 0.01));
   claimRewardOp.extra = {
     validator: {
       address: fromDelegation.validatorAddress,
       amount,
     },
-  }
+  };
   const delegations = nymResources.delegations.map((delegation) => ({
     ...delegation,
     pendingRewards:
       delegation.validatorAddress === fromDelegation.validatorAddress
         ? new BigNumber(0)
         : delegation.pendingRewards,
-  }))
-  setNymResources(account, delegations, undefined, undefined, undefined)
-  claimRewardOp.fee = new BigNumber(Math.round(amount.toNumber() * 0.001))
-  claimRewardOp.value = amount
-  account.operations.splice(opIndex, 0, claimRewardOp)
-  account.operationsCount++
-  return account
+  }));
+  setNymResources(account, delegations, undefined, undefined, undefined);
+  claimRewardOp.fee = new BigNumber(Math.round(amount.toNumber() * 0.001));
+  claimRewardOp.value = amount;
+  account.operations.splice(opIndex, 0, claimRewardOp);
+  account.operationsCount++;
+  return account;
 }
 
 /**
@@ -289,26 +289,26 @@ function addUndelegationOperation(account: NymAccount, rng: Prando): Account {
         withdrawAddress: "",
         unbondings: [],
         redelegations: [],
-      }
-  if (!nymResources.delegations.length) return account
+      };
+  if (!nymResources.delegations.length) return account;
 
   /** select position on the operation stack where we will insert the new claim rewards */
-  const opIndex = rng.next(0, 10)
-  const undelegationOp = genBaseOperation(account, rng, "UNDELEGATE", opIndex)
-  const fromDelegation = rng.nextArrayItem(nymResources.delegations)
+  const opIndex = rng.next(0, 10);
+  const undelegationOp = genBaseOperation(account, rng, "UNDELEGATE", opIndex);
+  const fromDelegation = rng.nextArrayItem(nymResources.delegations);
   const amount = new BigNumber(
     Math.round(
       fromDelegation.amount.toNumber() *
         (rng.nextBoolean() ? rng.next(0.1, 1) : 1)
     )
-  )
-  const claimedReward = fromDelegation.pendingRewards
+  );
+  const claimedReward = fromDelegation.pendingRewards;
   undelegationOp.extra = {
     validator: {
       address: fromDelegation.validatorAddress,
       amount,
     },
-  }
+  };
   const delegations = nymResources.delegations
     .map((delegation) => ({
       ...delegation,
@@ -318,7 +318,7 @@ function addUndelegationOperation(account: NymAccount, rng: Prando): Account {
           : delegation.amount,
       pendingRewards: new BigNumber(0),
     }))
-    .filter(({ amount }) => amount.gt(0))
+    .filter(({ amount }) => amount.gt(0));
   setNymResources(
     account,
     delegations,
@@ -331,12 +331,12 @@ function addUndelegationOperation(account: NymAccount, rng: Prando): Account {
       },
     ],
     undefined
-  )
-  undelegationOp.fee = new BigNumber(Math.round(amount.toNumber() * 0.001))
-  undelegationOp.value = undelegationOp.fee.minus(claimedReward)
-  account.operations.splice(opIndex, 0, undelegationOp)
-  account.operationsCount++
-  return account
+  );
+  undelegationOp.fee = new BigNumber(Math.round(amount.toNumber() * 0.001));
+  undelegationOp.value = undelegationOp.fee.minus(claimedReward);
+  account.operations.splice(opIndex, 0, undelegationOp);
+  account.operationsCount++;
+  return account;
 }
 
 /**
@@ -349,12 +349,12 @@ function genAccountEnhanceOperations(
   account: NymAccount,
   rng: Prando
 ): Account {
-  addDelegationOperation(account, rng)
-  addRedelegationOperation(account, rng)
-  addClaimRewardsOperation(account, rng)
-  addUndelegationOperation(account, rng)
-  addDelegationOperation(account, rng)
-  return account
+  addDelegationOperation(account, rng);
+  addRedelegationOperation(account, rng);
+  addClaimRewardsOperation(account, rng);
+  addUndelegationOperation(account, rng);
+  addDelegationOperation(account, rng);
+  return account;
 }
 
 /**
@@ -363,13 +363,13 @@ function genAccountEnhanceOperations(
  * @param {NymAccount} account
  */
 function postSyncAccount(account: NymAccount): Account {
-  const nymResources = account?.nymResources
-  const delegatedBalance = nymResources?.delegatedBalance ?? new BigNumber(0)
-  const unbondingBalance = nymResources?.unbondingBalance ?? new BigNumber(0)
+  const nymResources = account?.nymResources;
+  const delegatedBalance = nymResources?.delegatedBalance ?? new BigNumber(0);
+  const unbondingBalance = nymResources?.unbondingBalance ?? new BigNumber(0);
   account.spendableBalance = account.balance
     .minus(delegatedBalance)
-    .minus(unbondingBalance)
-  return account
+    .minus(unbondingBalance);
+  return account;
 }
 
 /**
@@ -383,7 +383,7 @@ function postScanAccount(
   {
     isEmpty,
   }: {
-    isEmpty: boolean
+    isEmpty: boolean;
   }
 ): NymAccount {
   if (isEmpty) {
@@ -395,15 +395,15 @@ function postScanAccount(
       withdrawAddress: account.id,
       unbondings: [],
       redelegations: [],
-    }
-    account.operations = []
+    };
+    account.operations = [];
   }
 
-  return account
+  return account;
 }
 
 export default {
   genAccountEnhanceOperations,
   postSyncAccount,
   postScanAccount,
-}
+};

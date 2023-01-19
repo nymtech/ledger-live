@@ -1,13 +1,13 @@
-import { from, Observable } from "rxjs"
-import { map } from "rxjs/operators"
-import invariant from "invariant"
-import flatMap from "lodash/flatMap"
-import zipWith from "lodash/zipWith"
-import { BigNumber } from "bignumber.js"
-import { Transaction as NymTransaction } from "./types"
-import type { NymDelegationInfo } from "./types"
-import nymValidatorsManager from "./validators"
-import { AccountLike } from "@ledgerhq/types-live"
+import { from, Observable } from "rxjs";
+import { map } from "rxjs/operators";
+import invariant from "invariant";
+import flatMap from "lodash/flatMap";
+import zipWith from "lodash/zipWith";
+import { BigNumber } from "bignumber.js";
+import { Transaction as NymTransaction } from "./types";
+import type { NymDelegationInfo } from "./types";
+import nymValidatorsManager from "./validators";
+import { AccountLike } from "@ledgerhq/types-live";
 
 const options = [
   {
@@ -47,24 +47,24 @@ const options = [
     multiple: true,
     desc: "Amount that the validator will receive",
   },
-]
+];
 
 function inferTransactions(
   transactions: Array<{
-    account: AccountLike
-    transaction: NymTransaction
+    account: AccountLike;
+    transaction: NymTransaction;
   }>,
   opts: Record<string, any>,
   { inferAmount }: any
 ): NymTransaction[] {
   return flatMap(transactions, ({ transaction, account }) => {
-    invariant(transaction.family === "nym", "nym family")
-    const validatorsAddresses: string[] = opts["nymValidator"] || []
+    invariant(transaction.family === "nym", "nym family");
+    const validatorsAddresses: string[] = opts["nymValidator"] || [];
     const validatorsAmounts: BigNumber[] = (
       opts["nymAmountValidator"] || []
     ).map((value) => {
-      return inferAmount(account, value)
-    })
+      return inferAmount(account, value);
+    });
     const validators: NymDelegationInfo[] = zipWith(
       validatorsAddresses,
       validatorsAmounts,
@@ -72,7 +72,7 @@ function inferTransactions(
         address,
         amount: amount || new BigNumber(0),
       })
-    )
+    );
     return {
       ...transaction,
       family: "nym",
@@ -82,8 +82,8 @@ function inferTransactions(
       gas: opts.gasLimit ? new BigNumber(opts.gasLimit) : null,
       validators: validators,
       sourceValidator: opts.sourceValidator,
-    } as NymTransaction
-  })
+    } as NymTransaction;
+  });
 }
 
 const nymValidatorsFormatters = {
@@ -95,7 +95,7 @@ const nymValidatorsFormatters = {
           `${v.validatorAddress} "${v.name}" ${v.votingPower} ${v.commission} ${v.estimatedYearlyRewardsRate}`
       )
       .join("\n"),
-}
+};
 const nymValidators = {
   args: [
     {
@@ -107,21 +107,21 @@ const nymValidators = {
   job: ({
     format,
   }: Partial<{
-    format: string
+    format: string;
   }>): Observable<string> =>
     from(nymValidatorsManager.getValidators()).pipe(
       map((validators) => {
         const f =
           (format && nymValidatorsFormatters[format]) ||
-          nymValidatorsFormatters.default
-        return f(validators)
+          nymValidatorsFormatters.default;
+        return f(validators);
       })
     ),
-}
+};
 export default {
   options,
   inferTransactions,
   commands: {
     nymValidators,
   },
-}
+};

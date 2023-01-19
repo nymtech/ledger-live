@@ -1,47 +1,47 @@
-import type { AccountLike, Account } from "@ledgerhq/types-live"
-import type { Transaction, TransactionStatus } from "./types"
-import type { DeviceTransactionField } from "../../transaction"
-import { getMainAccount } from "../../account"
-import { getAccountUnit } from "../../account"
-import { formatCurrencyUnit } from "../../currencies"
+import type { AccountLike, Account } from "@ledgerhq/types-live";
+import type { Transaction, TransactionStatus } from "./types";
+import type { DeviceTransactionField } from "../../transaction";
+import { getMainAccount } from "../../account";
+import { getAccountUnit } from "../../account";
+import { formatCurrencyUnit } from "../../currencies";
 export type ExtraDeviceTransactionField =
   | {
-      type: "nym.delegateValidators"
-      label: string
+      type: "nym.delegateValidators";
+      label: string;
     }
   | {
-      type: "nym.validatorName"
-      label: string
+      type: "nym.validatorName";
+      label: string;
     }
   | {
-      type: "nym.sourceValidatorName"
-      label: string
-    }
+      type: "nym.sourceValidatorName";
+      label: string;
+    };
 
 type NymTransactionFieldType = DeviceTransactionField & {
-  type: string
-  label: string
-  value?: string
-  address?: string
-}
+  type: string;
+  label: string;
+  value?: string;
+  address?: string;
+};
 
 const getSendFields = ({
   status: { amount },
   account,
   source,
 }: {
-  account: AccountLike
-  parentAccount: Account | null | undefined
-  transaction: Transaction
-  status: TransactionStatus
-  source: string
+  account: AccountLike;
+  parentAccount: Account | null | undefined;
+  transaction: Transaction;
+  status: TransactionStatus;
+  source: string;
 }) => {
-  const fields: NymTransactionFieldType[] = []
+  const fields: NymTransactionFieldType[] = [];
   fields.push({
     type: "text",
     label: "Type",
     value: "Send",
-  })
+  });
 
   if (!amount.isZero()) {
     fields.push({
@@ -51,16 +51,16 @@ const getSendFields = ({
         showCode: true,
         disableRounding: true,
       }),
-    })
+    });
   }
 
   fields.push({
     type: "address",
     label: "From",
     address: source,
-  })
-  return fields
-}
+  });
+  return fields;
+};
 
 function getDeviceTransactionConfig({
   account,
@@ -68,16 +68,16 @@ function getDeviceTransactionConfig({
   transaction,
   status,
 }: {
-  account: AccountLike
-  parentAccount: Account | null | undefined
-  transaction: Transaction
-  status: TransactionStatus
+  account: AccountLike;
+  parentAccount: Account | null | undefined;
+  transaction: Transaction;
+  status: TransactionStatus;
 }): Array<NymTransactionFieldType> {
-  const { mode, memo, validators } = transaction
-  const { estimatedFees } = status
-  const mainAccount = getMainAccount(account, parentAccount)
-  const source = mainAccount.freshAddress
-  let fields: NymTransactionFieldType[] = []
+  const { mode, memo, validators } = transaction;
+  const { estimatedFees } = status;
+  const mainAccount = getMainAccount(account, parentAccount);
+  const source = mainAccount.freshAddress;
+  let fields: NymTransactionFieldType[] = [];
 
   switch (mode) {
     case "send":
@@ -87,27 +87,27 @@ function getDeviceTransactionConfig({
         parentAccount,
         account,
         source,
-      })
-      break
+      });
+      break;
 
     case "delegate":
       fields.push({
         type: "text",
         label: "Type",
         value: "Delegate",
-      })
+      });
       fields.push({
         type: "nym.delegateValidators",
         label: "Validators",
-      })
-      break
+      });
+      break;
 
     case "undelegate":
       fields.push({
         type: "text",
         label: "Type",
         value: "Undelegate",
-      })
+      });
       fields.push({
         type: "text",
         label: "Amount",
@@ -119,19 +119,19 @@ function getDeviceTransactionConfig({
             disableRounding: true,
           }
         ),
-      })
+      });
       fields.push({
         type: "nym.validatorName",
         label: "Validator",
-      })
-      break
+      });
+      break;
 
     case "redelegate":
       fields.push({
         type: "text",
         label: "Type",
         value: "Redelegate",
-      })
+      });
       fields.push({
         type: "text",
         label: "Amount",
@@ -143,52 +143,52 @@ function getDeviceTransactionConfig({
             disableRounding: true,
           }
         ),
-      })
+      });
       fields.push({
         type: "nym.validatorName",
         label: "Validator Dest",
-      })
+      });
       fields.push({
         type: "nym.sourceValidatorName",
         label: "Validator Source",
-      })
-      break
+      });
+      break;
 
     case "claimReward":
       fields.push({
         type: "text",
         label: "Type",
         value: "Withdraw Reward",
-      })
+      });
       fields.push({
         type: "nym.validatorName",
         label: "Validator",
-      })
-      break
+      });
+      break;
 
     case "claimRewardCompound":
       fields.push({
         type: "text",
         label: "Type",
         value: "Withdraw Reward",
-      })
+      });
       fields.push({
         type: "nym.validatorName",
         label: "Validator",
-      })
+      });
       fields.push({
         type: "text",
         label: "Type",
         value: "Delegate",
-      })
+      });
       fields.push({
         type: "nym.delegateValidators",
         label: "Validators",
-      })
-      break
+      });
+      break;
 
     default:
-      break
+      break;
   }
 
   if (memo) {
@@ -196,17 +196,17 @@ function getDeviceTransactionConfig({
       type: "text",
       label: "Memo",
       value: memo,
-    })
+    });
   }
 
   if (estimatedFees && !estimatedFees.isZero()) {
     fields.push({
       type: "fees",
       label: "Fee",
-    })
+    });
   }
 
-  return fields
+  return fields;
 }
 
-export default getDeviceTransactionConfig
+export default getDeviceTransactionConfig;

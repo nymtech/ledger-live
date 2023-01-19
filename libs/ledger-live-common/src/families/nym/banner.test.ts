@@ -1,26 +1,26 @@
-import { getAccountBannerState } from "./banner"
-import * as preloadedData from "./preloadedData"
-import * as logic from "./logic"
-import type { NymAccount, NymValidatorItem } from "./types"
-import data from "./preloadedData.mock"
-import { LEDGER_VALIDATOR_ADDRESS } from "./utils"
-import { BigNumber } from "bignumber.js"
+import { getAccountBannerState } from "./banner";
+import * as preloadedData from "./preloadedData";
+import * as logic from "./logic";
+import type { NymAccount, NymValidatorItem } from "./types";
+import data from "./preloadedData.mock";
+import { LEDGER_VALIDATOR_ADDRESS } from "./utils";
+import { BigNumber } from "bignumber.js";
 
 jest.mock("./js-prepareTransaction", () => ({
   calculateFees: jest.fn(() => Promise.resolve({})),
-}))
+}));
 
 const ledgerValidator: NymValidatorItem | undefined = data.validators.find(
   (x) => x.validatorAddress === LEDGER_VALIDATOR_ADDRESS
-)
+);
 const expensiveValidator: NymValidatorItem | undefined = data.validators.find(
   (x) =>
     x.validatorAddress === "nymvaloper1qs8tnw2t8l6amtzvdemnnsq9dzk0ag0z52uzay"
-)
+);
 const cheapValidator: NymValidatorItem | undefined = data.validators.find(
   (x) =>
     x.validatorAddress === "nymvaloper1qaa9zej9a0ge3ugpx3pxyx602lxh3ztqgfnp42"
-)
+);
 
 const account: NymAccount = {
   type: "Account",
@@ -88,94 +88,94 @@ const account: NymAccount = {
     unbondingBalance: new BigNumber("0"),
     withdrawAddress: "",
   },
-}
+};
 
-const validators = [expensiveValidator, cheapValidator, ledgerValidator]
+const validators = [expensiveValidator, cheapValidator, ledgerValidator];
 
 describe("nym/banner", () => {
   describe("useNymFormattedDelegations", () => {
     afterEach(() => {
-      jest.restoreAllMocks()
-    })
+      jest.restoreAllMocks();
+    });
     it("should not display the banner", async () => {
       jest
         .spyOn(preloadedData, "getCurrentNymPreloadData")
         .mockReturnValue({ validators } as {
-          validators: NymValidatorItem[]
-        })
-      jest.spyOn(logic, "canDelegate").mockReturnValue(false)
-      jest.spyOn(logic, "canRedelegate").mockReturnValue(false)
-      const result = getAccountBannerState(account)
+          validators: NymValidatorItem[];
+        });
+      jest.spyOn(logic, "canDelegate").mockReturnValue(false);
+      jest.spyOn(logic, "canRedelegate").mockReturnValue(false);
+      const result = getAccountBannerState(account);
       expect(result).toStrictEqual({
         display: false,
         redelegate: false,
         validatorSrcAddress: "",
         ledgerValidator,
-      })
-    })
+      });
+    });
     it("should return display delegate mode", async () => {
       jest
         .spyOn(preloadedData, "getCurrentNymPreloadData")
         .mockReturnValue({ validators } as {
-          validators: NymValidatorItem[]
-        })
-      jest.spyOn(logic, "canDelegate").mockReturnValue(true)
-      jest.spyOn(logic, "canRedelegate").mockReturnValue(false)
-      const result = getAccountBannerState(account)
+          validators: NymValidatorItem[];
+        });
+      jest.spyOn(logic, "canDelegate").mockReturnValue(true);
+      jest.spyOn(logic, "canRedelegate").mockReturnValue(false);
+      const result = getAccountBannerState(account);
       expect(result).toStrictEqual({
         display: true,
         redelegate: false,
         validatorSrcAddress: "",
         ledgerValidator,
-      })
-    })
+      });
+    });
     it("should return display redelegate mode", async () => {
       jest
         .spyOn(preloadedData, "getCurrentNymPreloadData")
         .mockReturnValue({ validators } as {
-          validators: NymValidatorItem[]
-        })
-      jest.spyOn(logic, "canDelegate").mockReturnValue(false)
-      jest.spyOn(logic, "canRedelegate").mockReturnValue(true)
+          validators: NymValidatorItem[];
+        });
+      jest.spyOn(logic, "canDelegate").mockReturnValue(false);
+      jest.spyOn(logic, "canRedelegate").mockReturnValue(true);
       account.nymResources.redelegations.push({
         validatorSrcAddress: "xxxx",
         validatorDstAddress: expensiveValidator?.validatorAddress as string,
         amount: new BigNumber(1000),
         completionDate: new Date(),
-      })
+      });
       const accountWithSpendable5000 = {
         ...account,
         spendableBalance: new BigNumber(5000),
-      }
-      const result = getAccountBannerState(accountWithSpendable5000)
+      };
+      const result = getAccountBannerState(accountWithSpendable5000);
       expect(result).toStrictEqual({
         display: true,
         redelegate: true,
         validatorSrcAddress: expensiveValidator?.validatorAddress,
         ledgerValidator,
-      })
-    })
+      });
+    });
     it("should return not display redelegate mode", async () => {
       jest
         .spyOn(preloadedData, "getCurrentNymPreloadData")
         .mockReturnValue({ validators } as {
-          validators: NymValidatorItem[]
-        })
-      jest.spyOn(logic, "canDelegate").mockReturnValue(false)
-      jest.spyOn(logic, "canRedelegate").mockReturnValue(false)
+          validators: NymValidatorItem[];
+        });
+      jest.spyOn(logic, "canDelegate").mockReturnValue(false);
+      jest.spyOn(logic, "canRedelegate").mockReturnValue(false);
       account.nymResources.redelegations.push({
         validatorSrcAddress: "xxxx",
         validatorDstAddress: expensiveValidator?.validatorAddress as string,
         amount: new BigNumber(1000),
         completionDate: new Date(),
-      })
-      const result = getAccountBannerState(account)
+      });
+      const result = getAccountBannerState(account);
       expect(result).toStrictEqual({
         display: false,
         redelegate: false,
         validatorSrcAddress: "",
         ledgerValidator,
-      })
-    })
-  })
-})
+      });
+    });
+  });
+});

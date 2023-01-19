@@ -1,5 +1,5 @@
-import { BigNumber } from "bignumber.js"
-import type { NymResourcesRaw, NymResources } from "./types"
+import { BigNumber } from "bignumber.js";
+import type { NymResourcesRaw, NymResources } from "./types";
 
 export function toNymResourcesRaw(r: NymResources): NymResourcesRaw {
   const {
@@ -10,7 +10,7 @@ export function toNymResourcesRaw(r: NymResources): NymResourcesRaw {
     withdrawAddress,
     redelegations,
     unbondings,
-  } = r
+  } = r;
 
   return {
     delegations: delegations.map(
@@ -45,7 +45,7 @@ export function toNymResourcesRaw(r: NymResources): NymResourcesRaw {
     pendingRewardsBalance: pendingRewardsBalance.toString(),
     unbondingBalance: unbondingBalance.toString(),
     withdrawAddress,
-  }
+  };
 }
 export function fromNymResourcesRaw(r: NymResourcesRaw): NymResources {
   const {
@@ -56,7 +56,7 @@ export function fromNymResourcesRaw(r: NymResourcesRaw): NymResources {
     unbondingBalance,
     withdrawAddress,
     unbondings,
-  } = r
+  } = r;
   return {
     delegations: delegations.map(
       ({ amount, status, pendingRewards, validatorAddress }) => ({
@@ -90,5 +90,5 @@ export function fromNymResourcesRaw(r: NymResourcesRaw): NymResources {
     pendingRewardsBalance: new BigNumber(pendingRewardsBalance),
     unbondingBalance: new BigNumber(unbondingBalance),
     withdrawAddress,
-  }
+  };
 }
