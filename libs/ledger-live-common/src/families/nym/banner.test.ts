@@ -15,7 +15,7 @@ const ledgerValidator: NymValidatorItem | undefined = data.validators.find(
 );
 const expensiveValidator: NymValidatorItem | undefined = data.validators.find(
   (x) =>
-    x.validatorAddress === "nymvaloper1qs8tnw2t8l6amtzvdemnnsq9dzk0ag0z52uzay"
+    x.validatorAddress === "nvaloper1qs8tnw2t8l6amtzvdemnnsq9dzk0ag0z52uzay"
 );
 const cheapValidator: NymValidatorItem | undefined = data.validators.find(
   (x) =>
@@ -54,8 +54,8 @@ const account: NymAccount = {
     color: "#16192f",
     family: "nym",
     units: [
-      { name: "Atom", code: "NYM", magnitude: 6 },
-      { name: "microAtom", code: "unym", magnitude: 0 },
+      { name: "Nym", code: "NYM", magnitude: 6 },
+      { name: "microNym", code: "unym", magnitude: 0 },
     ],
     explorerViews: [
       {

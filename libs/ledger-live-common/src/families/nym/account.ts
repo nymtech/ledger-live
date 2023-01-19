@@ -34,7 +34,7 @@ function formatOperationSpecifics(
 }
 
 function getCurrentNymFamilyPreloadData(currencyName: string): NymPreloadData {
-  if (currencyName === "osmosis") {
+  if (currencyName === "nym") {
     return getCurrentOsmosisPreloadData();
   } else {
     return getCurrentNymPreloadData();
