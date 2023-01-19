@@ -1,33 +1,33 @@
-import mapValues from "lodash/mapValues"
+import mapValues from "lodash/mapValues";
 // set and get environment & config variables
-import { Subject } from "rxjs"
-import { $ElementType } from "utility-types"
+import { Subject } from "rxjs";
+import { $ElementType } from "utility-types";
 type EnvDef<V> = {
-  desc: string
-  def: V
-  parser: (arg0: unknown) => V | null | undefined
-}
+  desc: string;
+  def: V;
+  parser: (arg0: unknown) => V | null | undefined;
+};
 // type ExtractEnvValue = <V>(arg0: EnvDef<V>) => V;
-type EnvDefs = typeof envDefinitions
-type Env = typeof env
-export type EnvName = keyof EnvDefs
-export type EnvValue<Name extends EnvName> = $ElementType<Env, Name>
+type EnvDefs = typeof envDefinitions;
+type Env = typeof env;
+export type EnvName = keyof EnvDefs;
+export type EnvValue<Name extends EnvName> = $ElementType<Env, Name>;
 
 const intParser = (v: any): number | null | undefined => {
-  if (!Number.isNaN(v)) return parseInt(v, 10)
-}
+  if (!Number.isNaN(v)) return parseInt(v, 10);
+};
 
 const floatParser = (v: any): number | null | undefined => {
-  if (!Number.isNaN(v)) return parseFloat(v)
-}
+  if (!Number.isNaN(v)) return parseFloat(v);
+};
 
 const boolParser = (v: unknown): boolean | null | undefined => {
-  if (typeof v === "boolean") return v
-  return !(v === "0" || v === "false")
-}
+  if (typeof v === "boolean") return v;
+  return !(v === "0" || v === "false");
+};
 
 const stringParser = (v: unknown): string | null | undefined =>
-  typeof v === "string" ? v : undefined
+  typeof v === "string" ? v : undefined;
 
 type JSONValue =
   | string
@@ -35,21 +35,21 @@ type JSONValue =
   | boolean
   | null
   | { [x: string]: JSONValue }
-  | Array<JSONValue>
+  | Array<JSONValue>;
 
 const jsonParser = (v: unknown): JSONValue | undefined => {
   try {
-    if (typeof v !== "string") throw new Error()
-    return JSON.parse(v)
+    if (typeof v !== "string") throw new Error();
+    return JSON.parse(v);
   } catch (e) {
-    return undefined
+    return undefined;
   }
-}
+};
 
 const stringArrayParser = (v: any): string[] | null | undefined => {
-  const v_array = typeof v === "string" ? v.split(",") : null
-  if (Array.isArray(v_array) && v_array.length > 0) return v_array
-}
+  const v_array = typeof v === "string" ? v.split(",") : null;
+  if (Array.isArray(v_array) && v_array.length > 0) return v_array;
+};
 
 const envDefinitions = {
   ANALYTICS_CONSOLE: {
@@ -751,66 +751,66 @@ const envDefinitions = {
     parser: jsonParser,
     desc: "key value map for feature flags: {[key in FeatureId]?: Feature]}",
   },
-}
+};
 
 export const getDefinition = (name: string): EnvDef<any> | null | undefined =>
-  envDefinitions[name]
+  envDefinitions[name];
 
-envDefinitions as Record<EnvName, EnvDef<any>>
+envDefinitions as Record<EnvName, EnvDef<any>>;
 const defaults: Record<EnvName, any> = mapValues(
   envDefinitions,
   (o) => o.def
-) as unknown as Record<EnvName, any>
+) as unknown as Record<EnvName, any>;
 // private local state
-const env: Record<EnvName, any> = { ...defaults }
+const env: Record<EnvName, any> = { ...defaults };
 export const getAllEnvNames = (): EnvName[] =>
-  Object.keys(envDefinitions) as EnvName[]
-export const getAllEnvs = (): Env => ({ ...env })
+  Object.keys(envDefinitions) as EnvName[];
+export const getAllEnvs = (): Env => ({ ...env });
 // Usage: you must use getEnv at runtime because the env might be settled over time. typically will allow us to dynamically change them on the interface (e.g. some sort of experimental flags system)
 export const getEnv = <Name extends EnvName>(name: Name): EnvValue<Name> =>
-  env[name]
+  env[name];
 export const getEnvDefault = <Name extends EnvName>(
   name: Name
-): EnvValue<Name> => defaults[name]
+): EnvValue<Name> => defaults[name];
 export const isEnvDefault = <Name extends EnvName>(name: Name): boolean =>
-  env[name] === defaults[name]
+  env[name] === defaults[name];
 export const getEnvDesc = <Name extends EnvName>(name: Name): string =>
-  envDefinitions[name].desc
+  envDefinitions[name].desc;
 type ChangeValue<T extends EnvName> = {
-  name: EnvName
-  value: EnvValue<T>
-  oldValue: EnvValue<T>
-}
-export const changes: Subject<ChangeValue<any>> = new Subject()
+  name: EnvName;
+  value: EnvValue<T>;
+  oldValue: EnvValue<T>;
+};
+export const changes: Subject<ChangeValue<any>> = new Subject();
 // change one environment
 export const setEnv = <Name extends EnvName>(
   name: Name,
   value: EnvValue<Name>
 ): void => {
-  const oldValue = env[name]
+  const oldValue = env[name];
 
   if (oldValue !== value) {
-    env[name] = value
+    env[name] = value;
     changes.next({
       name,
       value,
       oldValue,
-    })
+    });
   }
-}
+};
 // change one environment with safety. returns true if it succeed
 export const setEnvUnsafe = (name: EnvName, unsafeValue: unknown): boolean => {
-  const definition = getDefinition(name)
-  if (!definition) return false
-  const { parser } = definition
-  const value = parser(unsafeValue)
+  const definition = getDefinition(name);
+  if (!definition) return false;
+  const { parser } = definition;
+  const value = parser(unsafeValue);
 
   if (value === undefined || value === null) {
-    console.warn(`Invalid ENV value for ${name}`)
-    return false
+    console.warn(`Invalid ENV value for ${name}`);
+    return false;
   }
 
   // $FlowFixMe flow don't seem to type proof it
-  setEnv(name, value)
-  return true
-}
+  setEnv(name, value);
+  return true;
+};
