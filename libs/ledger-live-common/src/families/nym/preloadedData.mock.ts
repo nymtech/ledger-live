@@ -961,7 +961,7 @@ const data: NymPreloadData = {
       validatorAddress: "nymvaloper17h2x3j7u44qkrq0sk8ul0r2qr440rwgjkfg0gh",
       tokens: 571902934315,
       votingPower: 571902934315 / (0.7202 * 254624972017526),
-      name: "FRESHATOMS",
+      name: "FRESHNYMS",
       commission: 0.0,
       estimatedYearlyRewardsRate: 0,
     },

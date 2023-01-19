@@ -22,8 +22,8 @@ const isStargate = (currency: CryptoCurrency) => {
   }
 };
 
-const parseUatomStrAsAtomNumber = (uatoms: string) => {
-  return parseFloat(uatoms) / 1000000.0;
+const parseUnymStrAsAtomNumber = (unyms: string) => {
+  return parseFloat(unyms) / 1000000.0;
 };
 
 export class NymValidatorsManager {
@@ -45,7 +45,7 @@ export class NymValidatorsManager {
   ) {
     this._currency = currency;
     this._endPoint = getBaseApiUrl(this._currency);
-    this._minDenom = currency.id === "nym_testnet" ? "umuon" : "uatom";
+    this._minDenom = currency.id === "nym_testnet" ? "umuon" : "unym";
 
     if (options?.namespace) {
       this._namespace = options.namespace;
@@ -131,12 +131,12 @@ export class NymValidatorsManager {
         : await this.getStargateRewardsState();
 
       // validators need the rewardsState ONLY to compute voting power as
-      // percentage instead of raw uatoms amounts
+      // percentage instead of raw unyms amounts
       return await this.cacheValidators(rewardsState);
     } else {
       const rewardsState = await this.getRewardsState();
       // validators need the rewardsState ONLY to compute voting power as
-      // percentage instead of raw uatoms amounts
+      // percentage instead of raw unyms amounts
       return await this.cacheValidators(rewardsState);
     }
   };
@@ -184,7 +184,7 @@ export class NymValidatorsManager {
         url: supplyUrl,
         method: "GET",
       });
-      const totalSupply = parseUatomStrAsAtomNumber(
+      const totalSupply = parseUnymStrAsAtomNumber(
         totalSupplyData.result[0].amount
       );
       const ratioUrl = `${this._endPoint}/staking/pool`;
@@ -193,8 +193,8 @@ export class NymValidatorsManager {
         method: "GET",
       });
       const actualBondedRatio =
-        parseUatomStrAsAtomNumber(ratioData.result.bonded_tokens) / totalSupply;
-      // Arbitrary value in ATOM.
+        parseUnymStrAsAtomNumber(ratioData.result.bonded_tokens) / totalSupply;
+      // Arbitrary value in NYM.
       const averageDailyFees = 20;
       // Arbitrary value in seconds
       const averageTimePerBlock = 7.5;
@@ -289,7 +289,7 @@ export class NymValidatorsManager {
         method: "GET",
       });
 
-      const totalSupply = parseUatomStrAsAtomNumber(
+      const totalSupply = parseUnymStrAsAtomNumber(
         totalSupplyData.amount.amount
       );
 
@@ -301,9 +301,9 @@ export class NymValidatorsManager {
       });
 
       const actualBondedRatio =
-        parseUatomStrAsAtomNumber(ratioData.pool.bonded_tokens) / totalSupply;
+        parseUnymStrAsAtomNumber(ratioData.pool.bonded_tokens) / totalSupply;
 
-      // Arbitrary value in ATOM.
+      // Arbitrary value in NYM.
       const averageDailyFees = 20;
 
       // Arbitrary value in seconds

@@ -21,7 +21,7 @@ export const buildTransaction = async (
 ): Promise<any> => {
   const msg: Array<{ typeUrl: string; value: any }> = [];
 
-  // Ledger Live is able to build transaction atomically,
+  // Ledger Live is able to build transaction nymically,
   // Take care expected data are complete before push msg.
   // Otherwise, the transaction is silently returned intact.
 

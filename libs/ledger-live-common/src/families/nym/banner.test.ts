@@ -42,20 +42,20 @@ const account: NymAccount = {
   operations: [],
   operationsCount: 1,
   pendingOperations: [],
-  unit: { name: "Atom", code: "ATOM", magnitude: 6 },
+  unit: { name: "Nym", code: "NYM", magnitude: 6 },
   currency: {
     type: "CryptoCurrency",
     id: "nym",
     coinType: 118,
     name: "Nym",
     managerAppName: "Nym",
-    ticker: "ATOM",
+    ticker: "NYM",
     scheme: "nym",
     color: "#16192f",
     family: "nym",
     units: [
-      { name: "Atom", code: "ATOM", magnitude: 6 },
-      { name: "microAtom", code: "uatom", magnitude: 0 },
+      { name: "Atom", code: "NYM", magnitude: 6 },
+      { name: "microAtom", code: "unym", magnitude: 0 },
     ],
     explorerViews: [
       {

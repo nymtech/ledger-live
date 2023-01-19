@@ -58,7 +58,7 @@ export function getAccountBannerState(account: NymAccount): AccountBannerState {
     ) {
       // Not found worst validator than ledger
       if (canDelegate(account)) {
-        // Delegate remaining ATOM (not staked)
+        // Delegate remaining NYM (not staked)
         display = true;
       }
     } else {

@@ -89,7 +89,7 @@ const txToOps = (info: any, id: string, txs: any): Operation[] => {
           op.type = "REWARD";
           const reward = message.attributes
             .find((attr) => attr.key === "amount")
-            .value.replace("uatom", "");
+            .value.replace("unym", "");
           op.value = new BigNumber(reward || 0);
           op.extra.validators.push({
             address: attributes.validator,

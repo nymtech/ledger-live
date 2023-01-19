@@ -106,7 +106,7 @@ describe("nym/react", () => {
       );
       expect(result.current.options.length).toBe(delegations.length);
       act(() => {
-        result.current.setQuery("FRESHATOMS");
+        result.current.setQuery("FRESHNYMS");
       });
       expect(result.current.options.length).toBe(0);
     });
