@@ -97,6 +97,16 @@ export const CosmosDelegateAllFundsWarning = createCustomErrorClass(
 export const CosmosTooManyValidators = createCustomErrorClass(
   "CosmosTooManyValidators"
 );
+
+export const NymDelegateAllFundsWarning = createCustomErrorClass(
+  "NymDelegateAllFundsWarning"
+);
+export const NymRedelegationInProgress = createCustomErrorClass(
+  "NymRedelegationInProgress"
+);
+export const NymTooManyValidators = createCustomErrorClass(
+  "NymTooManyValidators"
+);
 export const NotEnoughDelegationBalance = createCustomErrorClass(
   "NotEnoughDelegationBalance"
 );

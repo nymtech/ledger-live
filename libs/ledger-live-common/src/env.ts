@@ -97,6 +97,36 @@ const envDefinitions = {
     parser: stringParser,
     desc: "Node API to use for cosmos_testnet (COSMOS_NODE or STARGATE_NODE are known)",
   },
+  API_NYM_BLOCKCHAIN_EXPLORER_API_ENDPOINT: {
+    def: "https://nym.coin.ledger.com/",
+    parser: stringParser,
+    desc: "Node endpoint for nym",
+  },
+  API_NYM_NODE: {
+    def: "STARGATE_NODE",
+    parser: stringParser,
+    desc: "Node API to use for Nym",
+  },
+  API_NYM_TESTNET_BLOCKCHAIN_EXPLORER_API_ENDPOINT: {
+    def: "https://nym.coin.staging.aws.ledger.com",
+    parser: stringParser,
+    desc: "Node endpoint for nym",
+  },
+  API_NYM_TESTNET_NODE: {
+    def: "STARGATE_NODE",
+    parser: stringParser,
+    desc: "Node API to use for nym_testnet",
+  },
+  NYM_GAS_AMPLIFIER: {
+    def: 1.4,
+    parser: intParser,
+    desc: "estimate gas multiplier",
+  },
+  NYM_GAS_PRICE: {
+    def: 0.025,
+    parser: floatParser,
+    desc: "gasLimit * gasPrice to determine the fees price. A too low GAS_PRICE will get rejected before the transaction is broadcast",
+  },
   API_RIPPLE_RPC: {
     parser: stringParser,
     def: "https://xrplcluster.com/ledgerlive",

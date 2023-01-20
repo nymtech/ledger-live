@@ -11,6 +11,7 @@ import filecoin from "../families/filecoin/transaction";
 import hedera from "../families/hedera/transaction";
 import near from "../families/near/transaction";
 import neo from "../families/neo/transaction";
+import nym from "../families/nym/transaction";
 import osmosis from "../families/osmosis/transaction";
 import polkadot from "../families/polkadot/transaction";
 import ripple from "../families/ripple/transaction";
@@ -33,6 +34,7 @@ export default {
   hedera,
   near,
   neo,
+  nym,
   osmosis,
   polkadot,
   ripple,

@@ -50,6 +50,10 @@ import { Transaction as neoTransaction } from "../families/neo/types";
 import { TransactionRaw as neoTransactionRaw } from "../families/neo/types";
 import { TransactionStatus as neoTransactionStatus } from "../families/neo/types";
 import { TransactionStatusRaw as neoTransactionStatusRaw } from "../families/neo/types";
+import { Transaction as nymTransaction } from "../families/nym/types";
+import { TransactionRaw as nymTransactionRaw } from "../families/nym/types";
+import { TransactionStatus as nymTransactionStatus } from "../families/nym/types";
+import { TransactionStatusRaw as nymTransactionStatusRaw } from "../families/nym/types";
 import { Transaction as osmosisTransaction } from "../families/osmosis/types";
 import { TransactionRaw as osmosisTransactionRaw } from "../families/osmosis/types";
 import { TransactionStatus as osmosisTransactionStatus } from "../families/osmosis/types";
@@ -93,6 +97,7 @@ export type Transaction =
   | hederaTransaction
   | nearTransaction
   | neoTransaction
+  | nymTransaction
   | osmosisTransaction
   | polkadotTransaction
   | rippleTransaction
@@ -115,6 +120,7 @@ export type TransactionRaw =
   | hederaTransactionRaw
   | nearTransactionRaw
   | neoTransactionRaw
+  | nymTransactionRaw
   | osmosisTransactionRaw
   | polkadotTransactionRaw
   | rippleTransactionRaw
@@ -137,6 +143,7 @@ export type TransactionStatus =
   | hederaTransactionStatus
   | nearTransactionStatus
   | neoTransactionStatus
+  | nymTransactionStatus
   | osmosisTransactionStatus
   | polkadotTransactionStatus
   | rippleTransactionStatus
@@ -159,6 +166,7 @@ export type TransactionStatusRaw =
   | hederaTransactionStatusRaw
   | nearTransactionStatusRaw
   | neoTransactionStatusRaw
+  | nymTransactionStatusRaw
   | osmosisTransactionStatusRaw
   | polkadotTransactionStatusRaw
   | rippleTransactionStatusRaw

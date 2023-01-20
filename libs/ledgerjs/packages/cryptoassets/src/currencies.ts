@@ -1861,6 +1861,38 @@ export const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [],
   },
+  nym: {
+    type: "CryptoCurrency",
+    id: "nym",
+    coinType: 118,
+    name: "Nym",
+    managerAppName: "Nym",
+    ticker: "NYM",
+    scheme: "nym",
+    color: "#070B15",
+    family: "nym",
+    // FIXME: enable it back when confirmation number is fixed
+    // blockAvgTime: 8,
+    units: [
+      {
+        name: "Nym",
+        code: "NYM",
+        magnitude: 6,
+      },
+      {
+        name: "micro nym",
+        code: "unym",
+        magnitude: 0,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://www.mintscan.io/nyx/txs/$hash",
+        address: "https://www.mintscan.io/nyx/validators/$address",
+      },
+    ],
+    keywords: ["nym"],
+  },
   ontology: {
     type: "CryptoCurrency",
     id: "ontology",
